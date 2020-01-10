@@ -1,4 +1,4 @@
-package chaincode
+package poc01
 
 import (
 	"encoding/json"
@@ -130,6 +130,12 @@ func (scc *SupplyChainChaincode) placeOrder(stub shim.ChaincodeStubInterface, ar
 		return shim.Error(err.Error())
 	}
 
+	assetBytes, _ := stub.GetState(order.AssetId)
+
+	if len(assetBytes) == 0 {
+		return shim.Error(fmt.Sprintf(constants.ErrorAssetIdNotFound, order.AssetId))
+	}
+
 	orderId, err := utils.CreateCompositeKey(stub, constants.PrefixOrder)
 
 	if err != nil {
@@ -176,7 +182,7 @@ func (scc *SupplyChainChaincode) fulfillOrder(stub shim.ChaincodeStubInterface, 
 		return shim.Error(err.Error())
 	}
 
-	if order.IsCompleted == true {
+	if order.IsCompleted {
 		return shim.Error(fmt.Sprintf(constants.ErrorOrderIsFulfilled,orderFulfillment.Id))
 	}
 

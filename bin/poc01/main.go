@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	err := shim.Start(new(chaincode.SupplyChainChaincode))
+	err := shim.Start(new(poc01.SupplyChainChaincode))
 	if err != nil {
 		fmt.Printf(constants.ErrorStartChaincode, err)
 	}

@@ -1,8 +1,8 @@
 package types 
 
 import (
-	"time"
 	"github.com/shopspring/decimal"
+	"time"
 )
 
 type Order struct {

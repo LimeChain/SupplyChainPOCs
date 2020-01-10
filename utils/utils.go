@@ -1,14 +1,14 @@
 package utils
 
 import (
-	"encoding/json"
 	"bytes"
+	"encoding/json"
 	"fmt"
-	"github.com/hyperledger/fabric/core/chaincode/shim"
 	"github.com/LimeChain/SupplyChainPOCs/constants"
 	"github.com/LimeChain/SupplyChainPOCs/types"
-	"github.com/shopspring/decimal"
 	guuid "github.com/google/uuid"
+	"github.com/hyperledger/fabric/core/chaincode/shim"
+	"github.com/shopspring/decimal"
 )
 
 // =========================================================================================
@@ -88,11 +88,11 @@ func CreateRecord(stub *shim.MockStub, record *types.Record) types.Record {
 	return payload
 }
 
-func CreateOrder(stub *shim.MockStub) types.Order {
+func CreateOrder(stub *shim.MockStub, assetId string) types.Order {
 	order := types.Order {
-		AssetId: constants.ExampleAssetId,
-		SellerId: constants.ORG_ONE,
-		BuyerId: constants.ORG_TWO,
+		AssetId: assetId,
+		SellerId: constants.OrgOne,
+		BuyerId: constants.OrgTwo,
 		Quantity: constants.ExampleQuantity,
 		PricePerUnit: decimal.NewFromInt(constants.ExamplePrice) }
 
