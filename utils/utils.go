@@ -68,7 +68,7 @@ func CreateAsset(stub *shim.MockStub, asset *types.Asset) types.Asset {
 	jsonAsset, _ := json.Marshal(asset)
 	result := stub.MockInvoke("000", [][]byte{
 		[]byte(constants.AddAssetType),
-		[]byte(jsonAsset)})
+		jsonAsset})
 	
 	payload := types.Asset {}
 	json.Unmarshal(result.Payload, &payload)
@@ -80,7 +80,7 @@ func CreateRecord(stub *shim.MockStub, record *types.Record) types.Record {
 	jsonRecord, _ := json.Marshal(record)
 	result := stub.MockInvoke("000", [][]byte{
 		[]byte(constants.Manufacture),
-		[]byte(jsonRecord)})
+		jsonRecord})
 	
 	payload := types.Record {}
 	json.Unmarshal(result.Payload, &payload)
@@ -99,7 +99,7 @@ func CreateOrder(stub *shim.MockStub) types.Order {
 	jsonOrder, _ := json.Marshal(order)
 	result := stub.MockInvoke("000", [][]byte{
 		[]byte(constants.PlaceOrder),
-		[]byte(jsonOrder)})
+		jsonOrder})
 
 	payload := types.Order {}
 	json.Unmarshal(result.Payload, &payload)

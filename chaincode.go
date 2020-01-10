@@ -3,12 +3,12 @@ package chaincode
 import (
 	"encoding/json"
 	"fmt"
-	"time"
 	"github.com/LimeChain/SupplyChainPOCs/constants"
 	"github.com/LimeChain/SupplyChainPOCs/types"
 	"github.com/LimeChain/SupplyChainPOCs/utils"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	"github.com/hyperledger/fabric/protos/peer"
+	"time"
 )
 
 type SupplyChainChaincode struct {
@@ -374,11 +374,4 @@ func (scc *SupplyChainChaincode) query(stub shim.ChaincodeStubInterface, args []
 	}
 
 	return shim.Success(queryResults)
-}
-
-func main() {
-	err := shim.Start(new(SupplyChainChaincode))
-	if err != nil {
-		fmt.Printf(constants.ErrorStartChaincode, err)
-	}
 }

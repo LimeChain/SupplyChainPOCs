@@ -222,7 +222,7 @@ var _ = Describe("Tests for SupplyChainChaincode", func() {
 
 			Expect(result.Status).To(Equal(constants.Status500))
 
-			expectedMessage := fmt.Sprintf(constants.ErrorOrderIdNotFound, "test")
+			expectedMessage := fmt.Sprintf(constants.ErrorOrderIdNotFound, constants.ExampleTest)
 			Expect(result.Message).To(Equal(expectedMessage))
 		})
 
