@@ -53,7 +53,7 @@ func GetQueryResultForQueryString(stub shim.ChaincodeStubInterface, queryString 
 }
 
 func CreateCompositeKey(stub shim.ChaincodeStubInterface, prefix string) (string, error) {
-	return (stub.CreateCompositeKey(prefix, []string{guuid.New().String()}))
+	return stub.CreateCompositeKey(prefix, []string{guuid.New().String()})
 }
 
 func GetOrganization(stub shim.ChaincodeStubInterface, index uint) string {

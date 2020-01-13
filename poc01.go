@@ -21,8 +21,17 @@ func (scc *SupplyChainChaincode) Init(stub shim.ChaincodeStubInterface) peer.Res
 		return shim.Error(constants.ErrorArgumentsLength)
 	}
 
-	organizations, _ := json.Marshal(args)
-	stub.PutState(constants.Organizations, organizations)
+	organizations, err := json.Marshal(args)
+
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
+	err = stub.PutState(constants.Organizations, organizations)
+
+	if err != nil {
+		return shim.Error(err.Error())
+	}
 	
 	return shim.Success(organizations)
 }
@@ -71,7 +80,11 @@ func (scc *SupplyChainChaincode) addAssetType(stub shim.ChaincodeStubInterface, 
 	asset.Id = assetId
 	asset.DateCreated = time.Now()
 
-	jsonAsset, _ := json.Marshal(asset)
+	jsonAsset, err := json.Marshal(asset)
+
+	if err != nil {
+		return shim.Error(err.Error())
+	}
 
 	err = stub.PutState(asset.Id, jsonAsset)
 	if err != nil {
@@ -108,7 +121,11 @@ func (scc *SupplyChainChaincode) manufacture(stub shim.ChaincodeStubInterface, a
 	record.Id = recordId
 	record.DateCreated = time.Now()
  
-	jsonRecord, _ := json.Marshal(record)
+	jsonRecord, err := json.Marshal(record)
+
+	if err != nil {
+		return shim.Error(err.Error())
+	}
 
 	err = stub.PutState(record.Id, jsonRecord)
 	if err != nil {
@@ -146,7 +163,11 @@ func (scc *SupplyChainChaincode) placeOrder(stub shim.ChaincodeStubInterface, ar
 	order.DateCreated = time.Now()
 	order.IsCompleted = false
 
-	jsonOrder, _ := json.Marshal(order)
+	jsonOrder, err := json.Marshal(order)
+
+	if err != nil {
+		return shim.Error(err.Error())
+	}
 
 	err = stub.PutState(order.Id, jsonOrder)
 
@@ -213,6 +234,7 @@ func (scc *SupplyChainChaincode) fulfillOrder(stub shim.ChaincodeStubInterface, 
 		newRecord := types.Record {
 			AssetId: record.AssetId,
 			BatchId: record.BatchId,
+			CreationOrderId: order.Id,
 			Owner: order.BuyerId,
 			Quantity: recordElem.Quantity,
 			DateCreated: time.Now(),
@@ -227,14 +249,24 @@ func (scc *SupplyChainChaincode) fulfillOrder(stub shim.ChaincodeStubInterface, 
 
 		newRecord.Id = newRecordId
 		
-		jsonRecord, _ := json.Marshal(record)
+		jsonRecord, err := json.Marshal(record)
+
+		if err != nil {
+			return shim.Error(err.Error())
+		}
+
 		err = stub.PutState(record.Id, jsonRecord)
 
 		if err != nil {
 			return shim.Error(err.Error())
 		}
 
-		jsonRecord, _ = json.Marshal(newRecord)
+		jsonRecord, err = json.Marshal(newRecord)
+
+		if err != nil {
+			return shim.Error(err.Error())
+		}
+
 		err = stub.PutState(newRecord.Id, jsonRecord)
 
 		if err != nil {
@@ -243,7 +275,12 @@ func (scc *SupplyChainChaincode) fulfillOrder(stub shim.ChaincodeStubInterface, 
 	}
 
 	order.IsCompleted = true
-	jsonOrder, _ := json.Marshal(order)
+	jsonOrder, err := json.Marshal(order)
+
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
 	err = stub.PutState(order.Id, jsonOrder)
 
 	if err != nil {
@@ -309,7 +346,12 @@ func (scc *SupplyChainChaincode) assemble(stub shim.ChaincodeStubInterface, args
 		record.Quantity -= recordElem.Quantity
 		record.LastUpdated = time.Now()
 
-		jsonRecord, _ := json.Marshal(record)
+		jsonRecord, err := json.Marshal(record)
+
+		if err != nil {
+			return shim.Error(err.Error())
+		}
+
 		err = stub.PutState(record.Id, jsonRecord)
 
 		if err != nil {
@@ -319,7 +361,12 @@ func (scc *SupplyChainChaincode) assemble(stub shim.ChaincodeStubInterface, args
 		newRecord.AssembledFrom = append(newRecord.AssembledFrom, recordElem)
 	}
 
-	jsonNewRecord, _ := json.Marshal(newRecord)
+	jsonNewRecord, err := json.Marshal(newRecord)
+
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
 	err = stub.PutState(newRecord.Id, jsonNewRecord)
 
 	if err != nil {
@@ -361,7 +408,11 @@ func (scc *SupplyChainChaincode) sell(stub shim.ChaincodeStubInterface, args []s
 	record.Quantity -= sellRequest.Quantity
 	record.LastUpdated = time.Now()
 
-	jsonRecord, _ := json.Marshal(record)
+	jsonRecord, err := json.Marshal(record)
+
+	if err != nil {
+		return shim.Error(err.Error())
+	}
 
 	err = stub.PutState(sellRequest.RecordId, jsonRecord)
 
