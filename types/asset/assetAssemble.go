@@ -1,6 +1,6 @@
-package types
+package asset
 
-type AssetAssembly struct {
+type AssetAssemble []struct {
 	Id       string `json:"id,omitempty"`
 	Quantity uint64 `json:"quantity,omitempty"`
 }

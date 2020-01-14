@@ -5,7 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/LimeChain/SupplyChainPOCs/constants"
-	"github.com/LimeChain/SupplyChainPOCs/types"
+	"github.com/LimeChain/SupplyChainPOCs/types/asset"
+	"github.com/LimeChain/SupplyChainPOCs/types/dto"
+	"github.com/LimeChain/SupplyChainPOCs/types/order"
 	guuid "github.com/google/uuid"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	"github.com/shopspring/decimal"
@@ -15,37 +17,37 @@ import (
 // GetQueryResultForQueryString executes the passed in query string.
 // Result set is built and returned as a byte array containing the JSON results.
 // =========================================================================================
-func GetQueryResultForQueryString(stub shim.ChaincodeStubInterface, queryString string)([] byte, error) {
+func GetQueryResultForQueryString(stub shim.ChaincodeStubInterface, queryString string) ([] byte, error) {
 	fmt.Printf("- getQueryResultForQueryString queryString:\n%s\n", queryString)
 	resultsIterator, err := stub.GetQueryResult(queryString)
 	fmt.Println(resultsIterator)
 	defer resultsIterator.Close()
 	if err != nil {
-			return nil, err
+		return nil, err
 	}
 	// buffer is a JSON array containing QueryRecords
 	var buffer bytes.Buffer
 	buffer.WriteString("[")
 	bArrayMemberAlreadyWritten := false
 	for resultsIterator.HasNext() {
-			queryResponse,
-			err := resultsIterator.Next()
-			if err != nil {
-					return nil, err
-			}
-			// Add a comma before array members, suppress it for the first array member
-			if bArrayMemberAlreadyWritten == true {
-					buffer.WriteString(",")
-			}
-			buffer.WriteString("{\"Key\":")
-			buffer.WriteString("\"")
-			buffer.WriteString(queryResponse.Key)
-			buffer.WriteString("\"")
-			buffer.WriteString(", \"Record\":")
-			// Record is a JSON object, so we write as-is
-			buffer.WriteString(string(queryResponse.Value))
-			buffer.WriteString("}")
-			bArrayMemberAlreadyWritten = true
+		queryResponse,
+		err := resultsIterator.Next()
+		if err != nil {
+			return nil, err
+		}
+		// Add a comma before array members, suppress it for the first array member
+		if bArrayMemberAlreadyWritten == true {
+			buffer.WriteString(",")
+		}
+		buffer.WriteString("{\"Key\":")
+		buffer.WriteString("\"")
+		buffer.WriteString(queryResponse.Key)
+		buffer.WriteString("\"")
+		buffer.WriteString(", \"Record\":")
+		// Record is a JSON object, so we write as-is
+		buffer.WriteString(string(queryResponse.Value))
+		buffer.WriteString("}")
+		bArrayMemberAlreadyWritten = true
 	}
 	buffer.WriteString("]")
 	fmt.Printf("- getQueryResultForQueryString queryResult:\n%s\n", buffer.String())
@@ -64,44 +66,32 @@ func GetOrganization(stub shim.ChaincodeStubInterface, index uint) string {
 	return organizations[index]
 }
 
-func CreateAsset(stub *shim.MockStub, asset *types.Asset) types.Asset {
-	jsonAsset, _ := json.Marshal(asset)
+func CreateAsset(stub *shim.MockStub, assetDto *dto.AssetDto) asset.Asset {
+	jsonAsset, _ := json.Marshal(assetDto)
 	result := stub.MockInvoke("000", [][]byte{
 		[]byte(constants.AddAssetType),
 		jsonAsset})
-	
-	payload := types.Asset {}
+
+	payload := asset.Asset{}
 	json.Unmarshal(result.Payload, &payload)
 
 	return payload
 }
 
-func CreateRecord(stub *shim.MockStub, record *types.Record) types.Record {
-	jsonRecord, _ := json.Marshal(record)
-	result := stub.MockInvoke("000", [][]byte{
-		[]byte(constants.Manufacture),
-		jsonRecord})
-	
-	payload := types.Record {}
-	json.Unmarshal(result.Payload, &payload)
+func CreateOrder(stub *shim.MockStub, assetId string) order.Order {
+	orderDto := dto.OrderDto{
+		AssetId:      assetId,
+		SellerId:     constants.OrgOne,
+		BuyerId:      constants.OrgTwo,
+		Quantity:     constants.ExampleQuantity,
+		PricePerUnit: decimal.NewFromInt(constants.ExamplePrice)}
 
-	return payload
-}
-
-func CreateOrder(stub *shim.MockStub, assetId string) types.Order {
-	order := types.Order {
-		AssetId: assetId,
-		SellerId: constants.OrgOne,
-		BuyerId: constants.OrgTwo,
-		Quantity: constants.ExampleQuantity,
-		PricePerUnit: decimal.NewFromInt(constants.ExamplePrice) }
-
-	jsonOrder, _ := json.Marshal(order)
+	jsonOrder, _ := json.Marshal(orderDto)
 	result := stub.MockInvoke("000", [][]byte{
 		[]byte(constants.PlaceOrder),
 		jsonOrder})
 
-	payload := types.Order {}
+	payload := order.Order{}
 	json.Unmarshal(result.Payload, &payload)
 
 	return payload

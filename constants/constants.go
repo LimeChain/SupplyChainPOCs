@@ -7,6 +7,7 @@ const (
 	ErrorInvalidFunctionName    = "Invalid invoke function name: %s"
 	ErrorOrderIdNotFound        = "Order with Id: %s not found"
 	ErrorOrderIsFulfilled       = "Order with Id: %s is already fulfilled"
+	ErrorOrderIsNotFulfilled    = "Order with Id: %s has not been fulfilled"
 	ErrorRecordIdNotFound       = "Record with Id: %s not found"
 	ErrorRecordQuantity         = "Insufficient quantity for Record with Id: %s"
 	ErrorRecordDifferentAssetId = "Record with Id: %s has AssetId: %s, and not AssetId: %s"
@@ -51,7 +52,7 @@ const (
 
 // Test data
 const (
-	ExampleAssetId     =  "assetId"
+	ExampleAssetId     = "assetId"
 	ExampleBatchId     = "batchId"
 	ExampleDescription = "description"
 	ExampleRecordId    = "recordId"

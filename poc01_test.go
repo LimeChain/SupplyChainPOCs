@@ -3,14 +3,17 @@ package poc01_test
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/LimeChain/SupplyChainPOCs/types/asset"
+	"github.com/LimeChain/SupplyChainPOCs/types/dto"
+	"github.com/LimeChain/SupplyChainPOCs/types/order"
+	"github.com/LimeChain/SupplyChainPOCs/types/record"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	"github.com/hyperledger/fabric/protos/peer"
 	"github.com/shopspring/decimal"
 	"testing"
-	
+
 	"github.com/LimeChain/SupplyChainPOCs"
 	"github.com/LimeChain/SupplyChainPOCs/constants"
-	"github.com/LimeChain/SupplyChainPOCs/types"
 	"github.com/LimeChain/SupplyChainPOCs/utils"
 
 	. "github.com/onsi/ginkgo"
@@ -19,12 +22,12 @@ import (
 
 func TestSupplyChainPOCs(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "SupplyChainPOCs Suite")
+	RunSpecs(t, "POC1Chaincode Suite")
 }
 
-var _ = Describe("Tests for SupplyChainChaincode", func() {
-	
-	stub := shim.NewMockStub("testingStub", new(poc01.SupplyChainChaincode))
+var _ = Describe("Tests for POC1Chaincode", func() {
+
+	stub := shim.NewMockStub("testingStub", new(poc01.POC1Chaincode))
 	var result peer.Response
 
 	BeforeSuite(func() {
@@ -37,7 +40,7 @@ var _ = Describe("Tests for SupplyChainChaincode", func() {
 
 	Describe("init", func() {
 		It("Should fail due to invalid arguments length", func() {
-			result := stub.MockInit("000", [][]byte {
+			result := stub.MockInit("000", [][]byte{
 				[]byte(constants.Init)})
 
 			Expect(result.Status).To(Equal(constants.Status500))
@@ -50,7 +53,7 @@ var _ = Describe("Tests for SupplyChainChaincode", func() {
 		Describe("invalid function name", func() {
 			It("Should unsuccessfully execute invoke due to invalid function name", func() {
 				result = stub.MockInvoke("000", [][]byte{
-					[]byte(constants.ExampleTest) })
+					[]byte(constants.ExampleTest)})
 
 				Expect(result.Status).To(Equal(constants.Status500))
 
@@ -60,33 +63,33 @@ var _ = Describe("Tests for SupplyChainChaincode", func() {
 		})
 
 		Describe("addAssetType", func() {
-			var asset types.Asset
-			var payload types.Asset
+			var assetDto dto.AssetDto
+			var payload asset.Asset
 
-			BeforeEach(func () {
-				asset = types.Asset {
+			BeforeEach(func() {
+				assetDto = dto.AssetDto{
 					Description: constants.ExampleDescription,
-					IsActive: true }
+					IsActive:    true}
 
-				jsonAsset, _ := json.Marshal(asset)
+				jsonAsset, _ := json.Marshal(assetDto)
 
 				result = stub.MockInvoke("000", [][]byte{
 					[]byte(constants.AddAssetType),
-					jsonAsset })
+					jsonAsset})
 			})
 
 			It("Should successfully execute addAssetType", func() {
 				Expect(result.Status).To(Equal(constants.Status200))
 
-				payload = types.Asset {}
+				payload = asset.Asset{}
 				json.Unmarshal(result.Payload, &payload)
 
-				Expect(payload.Description).To(Equal(asset.Description))
-				Expect(payload.IsActive).To(Equal(asset.IsActive))
+				Expect(payload.Description).To(Equal(assetDto.Description))
+				Expect(payload.IsActive).To(Equal(assetDto.IsActive))
 			})
 
 			It("Should unsuccessfully execute addAssetType due to invalid arguments length", func() {
-				result = stub.MockInvoke("000", [][]byte {
+				result = stub.MockInvoke("000", [][]byte{
 					[]byte(constants.AddAssetType)})
 
 				Expect(result.Status).To(Equal(constants.Status500))
@@ -94,7 +97,7 @@ var _ = Describe("Tests for SupplyChainChaincode", func() {
 			})
 
 			It("Should unsuccessfully execute addAssetType due to invalid argument", func() {
-				result = stub.MockInvoke("000", [][]byte {
+				result = stub.MockInvoke("000", [][]byte{
 					[]byte(constants.AddAssetType),
 					[]byte(constants.ExampleTest)})
 
@@ -103,61 +106,67 @@ var _ = Describe("Tests for SupplyChainChaincode", func() {
 		})
 
 		Describe("manufacture functionality", func() {
-			var payload types.Record
-			var record types.Record
+			var payload record.AssetBoundRecord
+			var recordDto dto.AssetBoundRecordDto
 
 			It("Should successfully execute manufacture", func() {
-				asset := types.Asset {
+				assetDto := dto.AssetDto{
 					Description: constants.ExampleDescription,
-					IsActive: true }
+					IsActive:    true}
 
-				assetPayload := utils.CreateAsset(stub, &asset)
+				assetPayload := utils.CreateAsset(stub, &assetDto)
 
-				record = types.Record {
+				recordDto = dto.AssetBoundRecordDto{
+					RecordDto: &dto.RecordDto{
+						BatchId:            constants.ExampleBatchId,
+						Owner:              constants.OrgOne,
+						Quantity:           constants.ExampleQuantity,
+						QualityCertificate: "",
+					},
 					AssetId: assetPayload.Id,
-					BatchId: constants.ExampleBatchId,
-					Owner: constants.OrgOne,
-					Quantity: constants.ExampleQuantity,
-					QualityCertificate: "" }
+				}
 
-				jsonRecord, _ := json.Marshal(record)
+				jsonRecord, _ := json.Marshal(recordDto)
 				result = stub.MockInvoke("000", [][]byte{
 					[]byte(constants.Manufacture),
-					jsonRecord })
+					jsonRecord})
 
 				Expect(result.Status).To(Equal(constants.Status200))
 
-				payload = types.Record {}
+				payload = record.AssetBoundRecord{}
 				json.Unmarshal(result.Payload, &payload)
 
-				Expect(payload.AssetId).To(Equal(record.AssetId))
-				Expect(payload.BatchId).To(Equal(record.BatchId))
-				Expect(payload.Owner).To(Equal(record.Owner))
-				Expect(payload.Quantity).To(Equal(record.Quantity))
-				Expect(payload.QualityCertificate).To(Equal(record.QualityCertificate))
+				Expect(payload.AssetId).To(Equal(recordDto.AssetId))
+				Expect(payload.BatchId).To(Equal(recordDto.BatchId))
+				Expect(payload.Owner).To(Equal(recordDto.Owner))
+				Expect(payload.Quantity).To(Equal(recordDto.Quantity))
+				Expect(payload.QualityCertificate).To(Equal(recordDto.QualityCertificate))
 			})
 
 			It("Should unsuccessfully execute manufacture due to invalid AssetId", func() {
-				record = types.Record {
+				recordDto = dto.AssetBoundRecordDto{
+					RecordDto: &dto.RecordDto{
+						BatchId:            constants.ExampleBatchId,
+						Owner:              constants.OrgOne,
+						Quantity:           constants.ExampleQuantity,
+						QualityCertificate: "",
+					},
 					AssetId: constants.ExampleAssetId,
-					BatchId: constants.ExampleBatchId,
-					Owner: constants.OrgOne,
-					Quantity: constants.ExampleQuantity,
-					QualityCertificate: "" }
+				}
 
-				jsonRecord, _ := json.Marshal(record)
+				jsonRecord, _ := json.Marshal(recordDto)
 				result = stub.MockInvoke("000", [][]byte{
 					[]byte(constants.Manufacture),
-					jsonRecord })
+					jsonRecord})
 
 				Expect(result.Status).To(Equal(constants.Status500))
 
-				expectedMessage := fmt.Sprintf(constants.ErrorAssetIdNotFound, record.AssetId)
+				expectedMessage := fmt.Sprintf(constants.ErrorAssetIdNotFound, recordDto.AssetId)
 				Expect(result.Message).To(Equal(expectedMessage))
 			})
 
 			It("Should unsuccessfully execute manufacture due to invalid arguments length", func() {
-				result = stub.MockInvoke("000", [][]byte {
+				result = stub.MockInvoke("000", [][]byte{
 					[]byte(constants.Manufacture)})
 
 				Expect(result.Status).To(Equal(constants.Status500))
@@ -165,7 +174,7 @@ var _ = Describe("Tests for SupplyChainChaincode", func() {
 			})
 
 			It("Should unsuccessfully execute manufacture due to invalid argument", func() {
-				result = stub.MockInvoke("000", [][]byte {
+				result = stub.MockInvoke("000", [][]byte{
 					[]byte(constants.Manufacture),
 					[]byte(constants.ExampleTest)})
 
@@ -174,47 +183,47 @@ var _ = Describe("Tests for SupplyChainChaincode", func() {
 		})
 
 		Describe("placeOrder functionality", func() {
-			var payload types.Order
-			var order types.Order
-			var assetPayload types.Asset
+			var payload order.Order
+			var orderDto dto.OrderDto
+			var assetPayload asset.Asset
 
 			BeforeEach(func() {
-				asset := types.Asset {
+				assetDto := dto.AssetDto{
 					Description: constants.ExampleDescription,
-					IsActive: true }
+					IsActive:    true}
 
-				assetPayload = utils.CreateAsset(stub, &asset)
+				assetPayload = utils.CreateAsset(stub, &assetDto)
 			})
 
 			It("Should successfully execute placeOrder", func() {
 
-				order = types.Order {
-					AssetId: assetPayload.Id,
-					SellerId: constants.OrgOne,
-					BuyerId: constants.OrgTwo,
-					Quantity: constants.ExampleQuantity,
-					PricePerUnit: decimal.NewFromInt(constants.ExamplePrice) }
+				orderDto = dto.OrderDto{
+					AssetId:      assetPayload.Id,
+					SellerId:     constants.OrgOne,
+					BuyerId:      constants.OrgTwo,
+					Quantity:     constants.ExampleQuantity,
+					PricePerUnit: decimal.NewFromInt(constants.ExamplePrice)}
 
-				jsonOrder, _ := json.Marshal(order)
+				jsonOrder, _ := json.Marshal(orderDto)
 				result = stub.MockInvoke("000", [][]byte{
 					[]byte(constants.PlaceOrder),
-					jsonOrder })
+					jsonOrder})
 
 				Expect(result.Status).To(Equal(constants.Status200))
 
-				payload = types.Order {}
+				payload = order.Order{}
 				json.Unmarshal(result.Payload, &payload)
 
-				Expect(payload.AssetId).To(Equal(order.AssetId))
-				Expect(payload.SellerId).To(Equal(order.SellerId))
-				Expect(payload.BuyerId).To(Equal(order.BuyerId))
-				Expect(payload.Quantity).To(Equal(order.Quantity))
-				Expect(payload.PricePerUnit).To(Equal(order.PricePerUnit))
+				Expect(payload.AssetId).To(Equal(orderDto.AssetId))
+				Expect(payload.SellerId).To(Equal(orderDto.SellerId))
+				Expect(payload.BuyerId).To(Equal(orderDto.BuyerId))
+				Expect(payload.Quantity).To(Equal(orderDto.Quantity))
+				Expect(payload.PricePerUnit).To(Equal(orderDto.PricePerUnit))
 				Expect(payload.IsCompleted).To(Equal(false))
 			})
 
 			It("Should unsuccessfully execute placecOrder due to invalid arguments length", func() {
-				result = stub.MockInvoke("000", [][]byte {
+				result = stub.MockInvoke("000", [][]byte{
 					[]byte(constants.Manufacture)})
 
 				Expect(result.Status).To(Equal(constants.Status500))
@@ -222,7 +231,7 @@ var _ = Describe("Tests for SupplyChainChaincode", func() {
 			})
 
 			It("Should unsuccessfully execute placeOrder due to invalid argument", func() {
-				result = stub.MockInvoke("000", [][]byte {
+				result = stub.MockInvoke("000", [][]byte{
 					[]byte(constants.Manufacture),
 					[]byte(constants.ExampleTest)})
 
@@ -230,47 +239,47 @@ var _ = Describe("Tests for SupplyChainChaincode", func() {
 			})
 
 			It("Should unsuccessfully execute placeOrder due to invalid assetId", func() {
-				order = types.Order {
-					AssetId: constants.ExampleAssetId,
-					SellerId: constants.OrgOne,
-					BuyerId: constants.OrgTwo,
-					Quantity: constants.ExampleQuantity,
-					PricePerUnit: decimal.NewFromInt(constants.ExamplePrice) }
+				orderDto = dto.OrderDto{
+					AssetId:      constants.ExampleAssetId,
+					SellerId:     constants.OrgOne,
+					BuyerId:      constants.OrgTwo,
+					Quantity:     constants.ExampleQuantity,
+					PricePerUnit: decimal.NewFromInt(constants.ExamplePrice)}
 
-				jsonOrder, _ := json.Marshal(order)
+				jsonOrder, _ := json.Marshal(orderDto)
 				result = stub.MockInvoke("000", [][]byte{
 					[]byte(constants.PlaceOrder),
-					jsonOrder })
+					jsonOrder})
 
 				Expect(result.Status).To(Equal(constants.Status500))
 
-				expectedMessage := fmt.Sprintf(constants.ErrorAssetIdNotFound, order.AssetId)
+				expectedMessage := fmt.Sprintf(constants.ErrorAssetIdNotFound, orderDto.AssetId)
 				Expect(result.Message).To(Equal(expectedMessage))
 			})
 		})
 
 		Describe("fulfillOrder functionality", func() {
-			var order types.Order
-			var orderFulfillment types.OrderFulfillment
-			var assetPayload types.Asset
+			var orderStruct order.Order
+			var orderFulfillment dto.OrderFulfillmentDto
+			var assetPayload asset.Asset
 
 			BeforeEach(func() {
-				asset := types.Asset {
+				assetDto := dto.AssetDto{
 					Description: constants.ExampleDescription,
-					IsActive: true }
+					IsActive:    true}
 
-				assetPayload = utils.CreateAsset(stub, &asset)
+				assetPayload = utils.CreateAsset(stub, &assetDto)
 			})
 
 			It("Should unsuccessfully execute fulfillOrder due to invalid order id", func() {
-				orderFulfillment = types.OrderFulfillment {
-					Id: constants.ExampleTest }
+				orderFulfillment = dto.OrderFulfillmentDto{
+					Id: constants.ExampleTest}
 
 				jsonOrderFulfillment, _ := json.Marshal(orderFulfillment)
 
-				result = stub.MockInvoke("000", [][]byte {
+				result = stub.MockInvoke("000", [][]byte{
 					[]byte(constants.FulfillOrder),
-					jsonOrderFulfillment })
+					jsonOrderFulfillment})
 
 				Expect(result.Status).To(Equal(constants.Status500))
 
@@ -279,7 +288,7 @@ var _ = Describe("Tests for SupplyChainChaincode", func() {
 			})
 
 			It("Should unsuccessfully execute fulfillOrder due to invalid arguments length", func() {
-				result = stub.MockInvoke("000", [][]byte {
+				result = stub.MockInvoke("000", [][]byte{
 					[]byte(constants.FulfillOrder)})
 
 				Expect(result.Status).To(Equal(constants.Status500))
@@ -287,77 +296,106 @@ var _ = Describe("Tests for SupplyChainChaincode", func() {
 			})
 
 			It("Should unsuccessfully execute fulfillOrder due to invalid argument", func() {
-				result = stub.MockInvoke("000", [][]byte {
+				result = stub.MockInvoke("000", [][]byte{
 					[]byte(constants.FulfillOrder),
 					[]byte(constants.ExampleTest)})
 
 				Expect(result.Status).To(Equal(constants.Status500))
 			})
 
-			It("Should successfully execute fulfillOrder with no records", func() {
-				order = utils.CreateOrder(stub, assetPayload.Id)
+			It("Should successfully execute fulfillOrder with no record", func() {
+				orderStruct = utils.CreateOrder(stub, assetPayload.Id)
 
-				orderFulfillment = types.OrderFulfillment {
-					Id: order.Id}
+				orderFulfillment = dto.OrderFulfillmentDto{
+					Id:     orderStruct.Id,
+					Status: true}
 				jsonOrderFulfillment, _ := json.Marshal(orderFulfillment)
 
-				result = stub.MockInvoke("000", [][]byte {
+				result = stub.MockInvoke("000", [][]byte{
 					[]byte(constants.FulfillOrder),
-					jsonOrderFulfillment })
+					jsonOrderFulfillment})
 
 				Expect(result.Status).To(Equal(constants.Status200))
 			})
 
 			It("Should unsuccessfully execute fulfillOrder due to already completed", func() {
-				order = utils.CreateOrder(stub, assetPayload.Id)
+				orderStruct = utils.CreateOrder(stub, assetPayload.Id)
 
-				orderFulfillment = types.OrderFulfillment {
-					Id: order.Id}
+				orderFulfillment = dto.OrderFulfillmentDto{
+					Id:     orderStruct.Id,
+					Status: true}
 				jsonOrderFulfillment, _ := json.Marshal(orderFulfillment)
 
-				result = stub.MockInvoke("000", [][]byte {
+				result = stub.MockInvoke("000", [][]byte{
 					[]byte(constants.FulfillOrder),
-					jsonOrderFulfillment })
+					jsonOrderFulfillment})
 
 				Expect(result.Status).To(Equal(constants.Status200))
 
-				result = stub.MockInvoke("000", [][]byte {
+				result = stub.MockInvoke("000", [][]byte{
 					[]byte(constants.FulfillOrder),
-					jsonOrderFulfillment })
+					jsonOrderFulfillment})
 
 				Expect(result.Status).To(Equal(constants.Status500))
 
-				expectedMessage := fmt.Sprintf(constants.ErrorOrderIsFulfilled, order.Id)
+				expectedMessage := fmt.Sprintf(constants.ErrorOrderIsFulfilled, orderStruct.Id)
+				Expect(result.Message).To(Equal(expectedMessage))
+			})
+
+			It("Should unsuccessfully execute fulfillOrder due to already completed", func() {
+				orderStruct = utils.CreateOrder(stub, assetPayload.Id)
+
+				orderFulfillment = dto.OrderFulfillmentDto{
+					Id:     orderStruct.Id,
+					Status: false}
+				jsonOrderFulfillment, _ := json.Marshal(orderFulfillment)
+
+				result = stub.MockInvoke("000", [][]byte{
+					[]byte(constants.FulfillOrder),
+					jsonOrderFulfillment})
+
+				Expect(result.Status).To(Equal(constants.Status500))
+
+				expectedMessage := fmt.Sprintf(constants.ErrorOrderIsNotFulfilled, orderStruct.Id)
 				Expect(result.Message).To(Equal(expectedMessage))
 			})
 		})
 
 		Describe("assemble functionality", func() {
-			var assembleRequest types.AssembleRequest
-			var recordPayload types.Record
-			var assetPayload types.Asset
+			var assembleRequest dto.AssembleRequestDto
+			var recordPayload record.Record
+			var assetPayload asset.Asset
 
 			BeforeEach(func() {
-				asset := types.Asset {
+				asset := dto.AssetDto{
 					Description: constants.ExampleDescription,
-					IsActive: true }
+					IsActive:    true}
 
 				assetPayload = utils.CreateAsset(stub, &asset)
 
-				record := types.Record {
+				recordDto := dto.AssetBoundRecordDto{
 					AssetId: assetPayload.Id,
-					BatchId: constants.ExampleBatchId,
-					Owner: constants.OrgOne,
-					Quantity: constants.ExampleQuantity,
-					QualityCertificate: "" }
+					RecordDto: &dto.RecordDto{
+						BatchId:            constants.ExampleBatchId,
+						Owner:              constants.OrgOne,
+						Quantity:           constants.ExampleQuantity,
+						QualityCertificate: "",
+					}}
 
-				recordPayload = utils.CreateRecord(stub, &record)
+				jsonRecordDto, _ := json.Marshal(recordDto)
+
+				result := stub.MockInvoke("000", [][]byte{
+					[]byte(constants.Manufacture),
+					jsonRecordDto,
+				})
+
+				json.Unmarshal(result.Payload, &recordPayload)
 
 				assetPayload = utils.CreateAsset(stub, &asset)
 			})
 
 			It("Should unsuccessfully execute assemble due to invalid arguments length", func() {
-				result = stub.MockInvoke("000", [][]byte {
+				result = stub.MockInvoke("000", [][]byte{
 					[]byte(constants.Assemble)})
 
 				Expect(result.Status).To(Equal(constants.Status500))
@@ -365,7 +403,7 @@ var _ = Describe("Tests for SupplyChainChaincode", func() {
 			})
 
 			It("Should unsuccessfully execute assemble due to invalid argument", func() {
-				result = stub.MockInvoke("000", [][]byte {
+				result = stub.MockInvoke("000", [][]byte{
 					[]byte(constants.Assemble),
 					[]byte(constants.ExampleTest)})
 
@@ -373,7 +411,7 @@ var _ = Describe("Tests for SupplyChainChaincode", func() {
 			})
 
 			It("Should unsuccessfully execute assemble due to invalid asset id", func() {
-				assembleRequest = types.AssembleRequest {
+				assembleRequest = dto.AssembleRequestDto {
 					AssetId: constants.ExampleAssetId,
 					BatchId: constants.ExampleBatchId,
 					Quantity: constants.ExampleQuantity,
@@ -392,20 +430,20 @@ var _ = Describe("Tests for SupplyChainChaincode", func() {
 			})
 
 			It("Should unsuccessfully execute assemble due to invalid record id", func() {
-				assembleRequest = types.AssembleRequest {
-					AssetId: assetPayload.Id,
-					BatchId: constants.ExampleBatchId,
+				assembleRequest = dto.AssembleRequestDto{
+					AssetId:  assetPayload.Id,
+					BatchId:  constants.ExampleBatchId,
 					Quantity: constants.ExampleQuantity,
-					Records: []types.AssetAssembly {
+					Records: dto.RecordQuantityDto{
 						{
-							Id: constants.ExampleRecordId,
-							Quantity: constants.ExampleQuantity }}}
+							Id:       constants.ExampleRecordId,
+							Quantity: constants.ExampleQuantity}}}
 
 				jsonAssembleRequest, _ := json.Marshal(assembleRequest)
 
-				result = stub.MockInvoke("000", [][]byte {
+				result = stub.MockInvoke("000", [][]byte{
 					[]byte(constants.Assemble),
-					jsonAssembleRequest })
+					jsonAssembleRequest})
 
 				Expect(result.Status).To(Equal(constants.Status500))
 
@@ -414,20 +452,20 @@ var _ = Describe("Tests for SupplyChainChaincode", func() {
 			})
 
 			It("Should unsuccessfully execute assemble due to invalid record quantity", func() {
-				assembleRequest = types.AssembleRequest {
-					AssetId: assetPayload.Id,
-					BatchId: constants.ExampleBatchId,
+				assembleRequest = dto.AssembleRequestDto{
+					AssetId:  assetPayload.Id,
+					BatchId:  constants.ExampleBatchId,
 					Quantity: constants.ExampleQuantity,
-					Records: []types.AssetAssembly {
+					Records: dto.RecordQuantityDto{
 						{
-							Id: recordPayload.Id,
-							Quantity: recordPayload.Quantity + 1 }}}
+							Id:       recordPayload.Id,
+							Quantity: recordPayload.Quantity + 1}}}
 
 				jsonAssembleRequest, _ := json.Marshal(assembleRequest)
 
-				result = stub.MockInvoke("000", [][]byte {
+				result = stub.MockInvoke("000", [][]byte{
 					[]byte(constants.Assemble),
-					jsonAssembleRequest })
+					jsonAssembleRequest})
 
 				Expect(result.Status).To(Equal(constants.Status500))
 
@@ -436,71 +474,91 @@ var _ = Describe("Tests for SupplyChainChaincode", func() {
 			})
 
 			It("Should successfully execute assemble", func() {
-				asset := types.Asset {
+				asset := dto.AssetDto{
 					Description: constants.ExampleDescription,
-					IsActive: true }
+					IsActive:    true}
 
 				assetPayloadTwo := utils.CreateAsset(stub, &asset)
 
-				record2 := types.Record {
+				record2Dto := dto.AssetBoundRecordDto{
 					AssetId: assetPayloadTwo.Id,
-					BatchId: constants.ExampleBatchId,
-					Owner: constants.OrgOne,
-					Quantity: constants.ExampleQuantity,
-					QualityCertificate: "" }
+					RecordDto: &dto.RecordDto{
+						BatchId:            constants.ExampleBatchId,
+						Owner:              constants.OrgOne,
+						Quantity:           constants.ExampleQuantity,
+						QualityCertificate: "",
+					}}
 
-				recordPayloadTwo := utils.CreateRecord(stub, &record2)
+				jsonRecordDto, _ := json.Marshal(record2Dto)
 
-				assembleRequest = types.AssembleRequest {
-					AssetId: assetPayload.Id,
-					BatchId: constants.ExampleBatchId,
+				result := stub.MockInvoke("000", [][]byte{
+					[]byte(constants.Manufacture),
+					jsonRecordDto,
+				})
+				var recordPayloadTwo record.Record
+				json.Unmarshal(result.Payload, &recordPayloadTwo)
+
+				assembleRequest = dto.AssembleRequestDto{
+					AssetId:  assetPayload.Id,
+					BatchId:  constants.ExampleBatchId,
 					Quantity: constants.ExampleQuantity,
-					Records: []types.AssetAssembly {
+					Records: dto.RecordQuantityDto{
 						{
-							Id: recordPayload.Id,
-							Quantity: recordPayload.Quantity },
+							Id:       recordPayload.Id,
+							Quantity: recordPayload.Quantity},
 						{
-							Id: recordPayloadTwo.Id,
-							Quantity: recordPayloadTwo.Quantity }}}
+							Id:       recordPayloadTwo.Id,
+							Quantity: recordPayloadTwo.Quantity}}}
 
 				jsonAssembleRequest, _ := json.Marshal(assembleRequest)
 
-				result = stub.MockInvoke("000", [][]byte {
+				result = stub.MockInvoke("000", [][]byte{
 					[]byte(constants.Assemble),
-					jsonAssembleRequest })
+					jsonAssembleRequest})
 
 				Expect(result.Status).To(Equal(constants.Status200))
 
-				payload := types.Record {}
+				payload := record.AssembableRecord{}
 				json.Unmarshal(result.Payload, &payload)
-				Expect(payload.AssembledFrom).To(Equal(assembleRequest.Records))
 				Expect(payload.Quantity).To(Equal(assembleRequest.Quantity))
+				for index, _ := range payload.AssembledFrom {
+					Expect(payload.AssembledFrom[index]).To(Equal(assembleRequest.Records[index]))
+				}
 			})
 		})
 
 		Describe("sell functionality", func() {
-			var sellRequest types.SellRequest
-			var recordPayload types.Record
+			var sellRequest dto.SellDto
+			var recordPayload record.Record
 
 			BeforeEach(func() {
-				asset := types.Asset {
+				assetDto := dto.AssetDto{
 					Description: constants.ExampleDescription,
-					IsActive: true }
+					IsActive:    true}
 
-				assetPayload := utils.CreateAsset(stub, &asset)
+				assetPayload := utils.CreateAsset(stub, &assetDto)
 
-				record := types.Record {
+				recordDto := dto.AssetBoundRecordDto{
 					AssetId: assetPayload.Id,
-					BatchId: constants.ExampleBatchId,
-					Owner: constants.OrgOne,
-					Quantity: constants.ExampleQuantity,
-					QualityCertificate: "" }
+					RecordDto: &dto.RecordDto{
+						BatchId:            constants.ExampleBatchId,
+						Owner:              constants.OrgOne,
+						Quantity:           constants.ExampleQuantity,
+						QualityCertificate: "",
+					}}
 
-				recordPayload = utils.CreateRecord(stub, &record)
+				jsonRecordDto, _ := json.Marshal(recordDto)
+
+				result := stub.MockInvoke("000", [][]byte{
+					[]byte(constants.Manufacture),
+					jsonRecordDto,
+				})
+
+				json.Unmarshal(result.Payload, &recordPayload)
 			})
 
 			It("Should unsuccessfully execute sell due to invalid arguments length", func() {
-				result = stub.MockInvoke("000", [][]byte {
+				result = stub.MockInvoke("000", [][]byte{
 					[]byte(constants.Sell)})
 
 				Expect(result.Status).To(Equal(constants.Status500))
@@ -508,7 +566,7 @@ var _ = Describe("Tests for SupplyChainChaincode", func() {
 			})
 
 			It("Should unsuccessfully execute sell due to invalid argument", func() {
-				result = stub.MockInvoke("000", [][]byte {
+				result = stub.MockInvoke("000", [][]byte{
 					[]byte(constants.Sell),
 					[]byte(constants.ExampleTest)})
 
@@ -516,14 +574,14 @@ var _ = Describe("Tests for SupplyChainChaincode", func() {
 			})
 
 			It("Should unsuccessfully execute sell due to invalid record Id", func() {
-				sellRequest = types.SellRequest {
+				sellRequest = dto.SellDto{
 					RecordId: constants.ExampleRecordId,
-					Quantity: constants.ExampleQuantity }
+					Quantity: constants.ExampleQuantity}
 				jsonSellRequest, _ := json.Marshal(sellRequest)
 
-				result = stub.MockInvoke("000", [][]byte {
+				result = stub.MockInvoke("000", [][]byte{
 					[]byte(constants.Sell),
-					jsonSellRequest })
+					jsonSellRequest})
 
 				Expect(result.Status).To(Equal(constants.Status500))
 
@@ -532,15 +590,15 @@ var _ = Describe("Tests for SupplyChainChaincode", func() {
 			})
 
 			It("Should unsuccessfully execute sell due to insufficient record quantity", func() {
-				sellRequest = types.SellRequest {
+				sellRequest = dto.SellDto{
 					RecordId: recordPayload.Id,
-					Quantity: recordPayload.Quantity + 1 }
+					Quantity: recordPayload.Quantity + 1}
 
 				jsonSellRequest, _ := json.Marshal(sellRequest)
 
-				result = stub.MockInvoke("000", [][]byte {
+				result = stub.MockInvoke("000", [][]byte{
 					[]byte(constants.Sell),
-					jsonSellRequest })
+					jsonSellRequest})
 
 				Expect(result.Status).To(Equal(constants.Status500))
 
@@ -549,19 +607,19 @@ var _ = Describe("Tests for SupplyChainChaincode", func() {
 			})
 
 			It("Should successfully execute sell", func() {
-				sellRequest = types.SellRequest {
+				sellRequest = dto.SellDto{
 					RecordId: recordPayload.Id,
-					Quantity: recordPayload.Quantity }
+					Quantity: recordPayload.Quantity}
 
 				jsonSellRequest, _ := json.Marshal(sellRequest)
 
-				result = stub.MockInvoke("000", [][]byte {
+				result = stub.MockInvoke("000", [][]byte{
 					[]byte(constants.Sell),
-					jsonSellRequest })
+					jsonSellRequest})
 
 				Expect(result.Status).To(Equal(constants.Status200))
 
-				payload := types.Record {}
+				payload := record.Record{}
 				json.Unmarshal(result.Payload, &payload)
 
 				Expect(payload.Quantity).To(Equal(uint64(0)))
