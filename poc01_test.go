@@ -118,10 +118,9 @@ var _ = Describe("Tests for POC1Chaincode", func() {
 
 				recordDto = dto.AssetBoundRecordDto{
 					RecordDto: &dto.RecordDto{
-						BatchId:            constants.ExampleBatchId,
-						Owner:              constants.OrgOne,
-						Quantity:           constants.ExampleQuantity,
-						QualityCertificate: "",
+						BatchId:  constants.ExampleBatchId,
+						Owner:    constants.OrgOne,
+						Quantity: constants.ExampleQuantity,
 					},
 					AssetId: assetPayload.Id,
 				}
@@ -140,16 +139,14 @@ var _ = Describe("Tests for POC1Chaincode", func() {
 				Expect(payload.BatchId).To(Equal(recordDto.BatchId))
 				Expect(payload.Owner).To(Equal(recordDto.Owner))
 				Expect(payload.Quantity).To(Equal(recordDto.Quantity))
-				Expect(payload.QualityCertificate).To(Equal(recordDto.QualityCertificate))
 			})
 
 			It("Should unsuccessfully execute manufacture due to invalid AssetId", func() {
 				recordDto = dto.AssetBoundRecordDto{
 					RecordDto: &dto.RecordDto{
-						BatchId:            constants.ExampleBatchId,
-						Owner:              constants.OrgOne,
-						Quantity:           constants.ExampleQuantity,
-						QualityCertificate: "",
+						BatchId:  constants.ExampleBatchId,
+						Owner:    constants.OrgOne,
+						Quantity: constants.ExampleQuantity,
 					},
 					AssetId: constants.ExampleAssetId,
 				}
@@ -372,10 +369,9 @@ var _ = Describe("Tests for POC1Chaincode", func() {
 				recordDto := dto.AssetBoundRecordDto{
 					AssetId: assetPayload.Id,
 					RecordDto: &dto.RecordDto{
-						BatchId:            constants.ExampleBatchId,
-						Owner:              constants.OrgOne,
-						Quantity:           constants.ExampleQuantity,
-						QualityCertificate: "",
+						BatchId:  constants.ExampleBatchId,
+						Owner:    constants.OrgOne,
+						Quantity: constants.ExampleQuantity,
 					}}
 
 				jsonRecordDto, _ := json.Marshal(recordDto)
@@ -479,10 +475,9 @@ var _ = Describe("Tests for POC1Chaincode", func() {
 				record2Dto := dto.AssetBoundRecordDto{
 					AssetId: assetPayloadTwo.Id,
 					RecordDto: &dto.RecordDto{
-						BatchId:            constants.ExampleBatchId,
-						Owner:              constants.OrgOne,
-						Quantity:           constants.ExampleQuantity,
-						QualityCertificate: "",
+						BatchId:  constants.ExampleBatchId,
+						Owner:    constants.OrgOne,
+						Quantity: constants.ExampleQuantity,
 					}}
 
 				jsonRecordDto, _ := json.Marshal(record2Dto)
@@ -537,10 +532,9 @@ var _ = Describe("Tests for POC1Chaincode", func() {
 				recordDto := dto.AssetBoundRecordDto{
 					AssetId: assetPayload.Id,
 					RecordDto: &dto.RecordDto{
-						BatchId:            constants.ExampleBatchId,
-						Owner:              constants.OrgOne,
-						Quantity:           constants.ExampleQuantity,
-						QualityCertificate: "",
+						BatchId:  constants.ExampleBatchId,
+						Owner:    constants.OrgOne,
+						Quantity: constants.ExampleQuantity,
 					}}
 
 				jsonRecordDto, _ := json.Marshal(recordDto)

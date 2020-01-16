@@ -238,12 +238,11 @@ func (poccc *POC1Chaincode) fulfillOrder(stub shim.ChaincodeStubInterface, args 
 
 		newRecordStruct := record.AssetBoundRecord{
 			Record: &record.Record{
-				BatchId:            recordStruct.BatchId,
-				CreationOrderId:    orderStruct.Id,
-				Owner:              orderStruct.BuyerId,
-				Quantity:           recordElem.Quantity,
-				DateCreated:        time.Now(),
-				QualityCertificate: recordStruct.QualityCertificate,
+				BatchId:         recordStruct.BatchId,
+				CreationOrderId: orderStruct.Id,
+				Owner:           orderStruct.BuyerId,
+				Quantity:        recordElem.Quantity,
+				DateCreated:     time.Now(),
 			},
 			AssetId: recordStruct.AssetId,
 		}

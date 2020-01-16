@@ -26,12 +26,11 @@ func (acc *AssembableChaincode) Manufacture(id string, assembableRecordDto dto.A
 func (acc *AssembableChaincode) Assemble(stub shim.ChaincodeStubInterface, id string, assembleRequest *dto.AssembleRequestDto, ) (*record.AssembableRecord, record.RecordParts, error) {
 	newRecord := record.AssembableRecord{
 		Record: &record.Record{
-			Id:                 id,
-			BatchId:            assembleRequest.BatchId,
-			Owner:              utils.GetOrganization(stub, constants.Org2Index),
-			Quantity:           assembleRequest.Quantity,
-			DateCreated:        time.Now(),
-			QualityCertificate: assembleRequest.QualityCertificate,
+			Id:          id,
+			BatchId:     assembleRequest.BatchId,
+			Owner:       utils.GetOrganization(stub, constants.Org2Index),
+			Quantity:    assembleRequest.Quantity,
+			DateCreated: time.Now(),
 		},
 		AssembledFrom: record.RecordParts{}}
 
