@@ -411,17 +411,17 @@ var _ = Describe("Tests for POC1Chaincode", func() {
 			})
 
 			It("Should unsuccessfully execute assemble due to invalid asset id", func() {
-				assembleRequest = dto.AssembleRequestDto {
-					AssetId: constants.ExampleAssetId,
-					BatchId: constants.ExampleBatchId,
+				assembleRequest = dto.AssembleRequestDto{
+					AssetId:  constants.ExampleAssetId,
+					BatchId:  constants.ExampleBatchId,
 					Quantity: constants.ExampleQuantity,
 				}
 
 				jsonAssembleRequest, _ := json.Marshal(assembleRequest)
 
-				result = stub.MockInvoke("000", [][]byte {
+				result = stub.MockInvoke("000", [][]byte{
 					[]byte(constants.Assemble),
-					jsonAssembleRequest })
+					jsonAssembleRequest})
 
 				Expect(result.Status).To(Equal(constants.Status500))
 
@@ -434,7 +434,7 @@ var _ = Describe("Tests for POC1Chaincode", func() {
 					AssetId:  assetPayload.Id,
 					BatchId:  constants.ExampleBatchId,
 					Quantity: constants.ExampleQuantity,
-					Records: dto.RecordQuantityDto{
+					Records: dto.RecordPartsDto{
 						{
 							Id:       constants.ExampleRecordId,
 							Quantity: constants.ExampleQuantity}}}
@@ -456,7 +456,7 @@ var _ = Describe("Tests for POC1Chaincode", func() {
 					AssetId:  assetPayload.Id,
 					BatchId:  constants.ExampleBatchId,
 					Quantity: constants.ExampleQuantity,
-					Records: dto.RecordQuantityDto{
+					Records: dto.RecordPartsDto{
 						{
 							Id:       recordPayload.Id,
 							Quantity: recordPayload.Quantity + 1}}}
@@ -502,7 +502,7 @@ var _ = Describe("Tests for POC1Chaincode", func() {
 					AssetId:  assetPayload.Id,
 					BatchId:  constants.ExampleBatchId,
 					Quantity: constants.ExampleQuantity,
-					Records: dto.RecordQuantityDto{
+					Records: dto.RecordPartsDto{
 						{
 							Id:       recordPayload.Id,
 							Quantity: recordPayload.Quantity},

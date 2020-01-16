@@ -2,5 +2,5 @@ package dto
 
 type AssembableRecordDto struct {
 	*RecordDto
-	AssembledFrom RecordQuantityDto `json:"assembledFrom,omitempty"`
+	AssembledFrom RecordPartsDto `json:"assembledFrom,omitempty"`
 }

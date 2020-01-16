@@ -314,7 +314,48 @@ func (scc *POC1Chaincode) assemble(stub shim.ChaincodeStubInterface, args []stri
 		return shim.Error(fmt.Sprintf(constants.ErrorAssetIdNotFound, assembleRequest.AssetId))
 	}
 
-	return scc.AssembableChaincode.Assemble(stub, &assembleRequest)
+	newRecordId, err := utils.CreateCompositeKey(stub, constants.PrefixRecord)
+	newRecord, updatedRecords, err := scc.AssembableChaincode.Assemble(stub, newRecordId, &assembleRequest)
+
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
+	for _, updatedRecord := range updatedRecords {
+		recordBytes, _ := stub.GetState(updatedRecord.Id)
+
+		recordStruct := record.AssembableRecord{}
+
+		err := json.Unmarshal(recordBytes, &recordStruct)
+
+		if err != nil {
+			return shim.Error(err.Error())
+		}
+
+		recordStruct.SetQuantity(updatedRecord.Quantity)
+
+		jsonRecord, err := json.Marshal(recordStruct)
+
+		if err != nil {
+			return shim.Error(err.Error())
+		}
+
+		err = stub.PutState(recordStruct.Id, jsonRecord)
+
+		if err != nil {
+			return shim.Error(err.Error())
+		}
+	}
+
+	jsonNewRecord, err := json.Marshal(newRecord)
+
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
+	err = stub.PutState(newRecord.Id, jsonNewRecord)
+
+	return shim.Success(jsonNewRecord)
 }
 
 func (scc *POC1Chaincode) sell(stub shim.ChaincodeStubInterface, args []string) peer.Response {
@@ -363,6 +404,12 @@ func (scc *POC1Chaincode) sell(stub shim.ChaincodeStubInterface, args []string) 
 	return shim.Success(jsonRecord)
 }
 
-func (scc *POC1Chaincode) query(stub shim.ChaincodeStubInterface, args []string) peer.Response {
-	return scc.AssembableChaincode.Query(stub, args)
+func (scc *POC1Chaincode) query(stub shim.ChaincodeStubInterface, args [] string) peer.Response {
+	queryResults, err := utils.GetQueryResultForQueryString(stub, args[0])
+
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
+	return shim.Success(queryResults)
 }

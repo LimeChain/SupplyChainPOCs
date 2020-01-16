@@ -29,5 +29,18 @@ func NewRecord(id string, dto *dto.RecordDto) *Record {
 
 func (record *Record) DecreaseQuantity(quantity uint64) {
 	record.Quantity -= quantity
+	record.update()
+}
+
+func (record *Record) SetQuantity(quantity uint64) {
+	record.Quantity = quantity
+	record.update()
+}
+
+func (record *Record) GetNewQuantity(subtractAmount uint64) uint64 {
+	return record.Quantity - subtractAmount
+}
+
+func (record *Record) update() {
 	record.LastUpdated = time.Now()
 }

@@ -1,6 +1,6 @@
-package dto
+package record
 
-type RecordQuantityDto []struct {
+type RecordParts []struct {
 	Id       string `json:"id,omitempty"`
 	Quantity uint64 `json:"quantity,omitempty"`
 }
