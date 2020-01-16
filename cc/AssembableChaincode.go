@@ -13,13 +13,13 @@ import (
 )
 
 type AssembableChaincode struct {
-	SupplyChainChaincode
+	BaseSupplyChainChaincode
 }
 
-func (acc *AssembableChaincode) Manufacture(id string, src dto.AssembableRecordDto) *record.AssembableRecord {
-	rec := acc.SupplyChainChaincode.Manufacture(id, src.RecordDto)
+func (acc *AssembableChaincode) Manufacture(id string, assembableRecordDto dto.AssembableRecordDto) *record.AssembableRecord {
+	rec := acc.BaseSupplyChainChaincode.Manufacture(id, assembableRecordDto.RecordDto)
 
-	records := record.RecordParts(src.AssembledFrom)
+	records := record.RecordParts(assembableRecordDto.AssembledFrom)
 	return record.NewAssembableRecord(rec, records)
 }
 

@@ -78,13 +78,15 @@ func CreateAsset(stub *shim.MockStub, assetDto *dto.AssetDto) asset.Asset {
 	return payload
 }
 
-func CreateOrder(stub *shim.MockStub, assetId string) order.Order {
-	orderDto := dto.OrderDto{
-		AssetId:      assetId,
-		SellerId:     constants.OrgOne,
-		BuyerId:      constants.OrgTwo,
-		Quantity:     constants.ExampleQuantity,
-		PricePerUnit: decimal.NewFromInt(constants.ExamplePrice)}
+func CreateAssetBoundOrder(stub *shim.MockStub, assetId string) order.Order {
+	orderDto := dto.AssetBoundOrderDto{
+		AssetId: assetId,
+		OrderDto: &dto.OrderDto{
+			SellerId:     constants.OrgOne,
+			BuyerId:      constants.OrgTwo,
+			Quantity:     constants.ExampleQuantity,
+			PricePerUnit: decimal.NewFromInt(constants.ExamplePrice),
+		}}
 
 	jsonOrder, _ := json.Marshal(orderDto)
 	result := stub.MockInvoke("000", [][]byte{

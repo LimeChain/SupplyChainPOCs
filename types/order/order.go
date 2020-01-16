@@ -8,7 +8,6 @@ import (
 
 type Order struct {
 	Id           string          `json:"id,omitempty"`
-	AssetId      string          `json:"assetId,omitempty"`
 	SellerId     string          `json:"sellerId,omitempty"`
 	BuyerId      string          `json:"buyerId,omitempty"`
 	Quantity     uint64          `json:"quantity,omitempty"`
@@ -21,7 +20,6 @@ type Order struct {
 func NewOrder(id string, dto *dto.OrderDto) *Order {
 	return &Order{
 		Id:           id,
-		AssetId:      dto.AssetId,
 		SellerId:     dto.SellerId,
 		BuyerId:      dto.BuyerId,
 		Quantity:     dto.Quantity,

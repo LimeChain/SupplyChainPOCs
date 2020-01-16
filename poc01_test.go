@@ -183,8 +183,8 @@ var _ = Describe("Tests for POC1Chaincode", func() {
 		})
 
 		Describe("placeOrder functionality", func() {
-			var payload order.Order
-			var orderDto dto.OrderDto
+			var payload order.AssetBoundOrder
+			var assetBoundOrderDto dto.AssetBoundOrderDto
 			var assetPayload asset.Asset
 
 			BeforeEach(func() {
@@ -197,28 +197,30 @@ var _ = Describe("Tests for POC1Chaincode", func() {
 
 			It("Should successfully execute placeOrder", func() {
 
-				orderDto = dto.OrderDto{
-					AssetId:      assetPayload.Id,
-					SellerId:     constants.OrgOne,
-					BuyerId:      constants.OrgTwo,
-					Quantity:     constants.ExampleQuantity,
-					PricePerUnit: decimal.NewFromInt(constants.ExamplePrice)}
+				assetBoundOrderDto = dto.AssetBoundOrderDto{
+					AssetId: assetPayload.Id,
+					OrderDto: &dto.OrderDto{
+						SellerId:     constants.OrgOne,
+						BuyerId:      constants.OrgTwo,
+						Quantity:     constants.ExampleQuantity,
+						PricePerUnit: decimal.NewFromInt(constants.ExamplePrice),
+					}}
 
-				jsonOrder, _ := json.Marshal(orderDto)
+				jsonOrder, _ := json.Marshal(assetBoundOrderDto)
 				result = stub.MockInvoke("000", [][]byte{
 					[]byte(constants.PlaceOrder),
 					jsonOrder})
 
 				Expect(result.Status).To(Equal(constants.Status200))
 
-				payload = order.Order{}
+				payload = order.AssetBoundOrder{}
 				json.Unmarshal(result.Payload, &payload)
 
-				Expect(payload.AssetId).To(Equal(orderDto.AssetId))
-				Expect(payload.SellerId).To(Equal(orderDto.SellerId))
-				Expect(payload.BuyerId).To(Equal(orderDto.BuyerId))
-				Expect(payload.Quantity).To(Equal(orderDto.Quantity))
-				Expect(payload.PricePerUnit).To(Equal(orderDto.PricePerUnit))
+				Expect(payload.AssetId).To(Equal(assetBoundOrderDto.AssetId))
+				Expect(payload.SellerId).To(Equal(assetBoundOrderDto.SellerId))
+				Expect(payload.BuyerId).To(Equal(assetBoundOrderDto.BuyerId))
+				Expect(payload.Quantity).To(Equal(assetBoundOrderDto.Quantity))
+				Expect(payload.PricePerUnit).To(Equal(assetBoundOrderDto.PricePerUnit))
 				Expect(payload.IsCompleted).To(Equal(false))
 			})
 
@@ -239,21 +241,22 @@ var _ = Describe("Tests for POC1Chaincode", func() {
 			})
 
 			It("Should unsuccessfully execute placeOrder due to invalid assetId", func() {
-				orderDto = dto.OrderDto{
-					AssetId:      constants.ExampleAssetId,
-					SellerId:     constants.OrgOne,
-					BuyerId:      constants.OrgTwo,
-					Quantity:     constants.ExampleQuantity,
-					PricePerUnit: decimal.NewFromInt(constants.ExamplePrice)}
+				assetBoundOrderDto = dto.AssetBoundOrderDto{
+					AssetId: constants.ExampleAssetId,
+					OrderDto: &dto.OrderDto{
+						SellerId:     constants.OrgOne,
+						BuyerId:      constants.OrgTwo,
+						Quantity:     constants.ExampleQuantity,
+						PricePerUnit: decimal.NewFromInt(constants.ExamplePrice)}}
 
-				jsonOrder, _ := json.Marshal(orderDto)
+				jsonOrder, _ := json.Marshal(assetBoundOrderDto)
 				result = stub.MockInvoke("000", [][]byte{
 					[]byte(constants.PlaceOrder),
 					jsonOrder})
 
 				Expect(result.Status).To(Equal(constants.Status500))
 
-				expectedMessage := fmt.Sprintf(constants.ErrorAssetIdNotFound, orderDto.AssetId)
+				expectedMessage := fmt.Sprintf(constants.ErrorAssetIdNotFound, assetBoundOrderDto.AssetId)
 				Expect(result.Message).To(Equal(expectedMessage))
 			})
 		})
@@ -262,6 +265,7 @@ var _ = Describe("Tests for POC1Chaincode", func() {
 			var orderStruct order.Order
 			var orderFulfillment dto.OrderFulfillmentDto
 			var assetPayload asset.Asset
+			var jsonOrderFulfillment []byte
 
 			BeforeEach(func() {
 				assetDto := dto.AssetDto{
@@ -269,6 +273,12 @@ var _ = Describe("Tests for POC1Chaincode", func() {
 					IsActive:    true}
 
 				assetPayload = utils.CreateAsset(stub, &assetDto)
+				orderStruct = utils.CreateAssetBoundOrder(stub, assetPayload.Id)
+
+				orderFulfillment = dto.OrderFulfillmentDto{
+					Id:     orderStruct.Id,
+					Status: true}
+				jsonOrderFulfillment, _ = json.Marshal(orderFulfillment)
 			})
 
 			It("Should unsuccessfully execute fulfillOrder due to invalid order id", func() {
@@ -304,13 +314,6 @@ var _ = Describe("Tests for POC1Chaincode", func() {
 			})
 
 			It("Should successfully execute fulfillOrder with no record", func() {
-				orderStruct = utils.CreateOrder(stub, assetPayload.Id)
-
-				orderFulfillment = dto.OrderFulfillmentDto{
-					Id:     orderStruct.Id,
-					Status: true}
-				jsonOrderFulfillment, _ := json.Marshal(orderFulfillment)
-
 				result = stub.MockInvoke("000", [][]byte{
 					[]byte(constants.FulfillOrder),
 					jsonOrderFulfillment})
@@ -319,13 +322,6 @@ var _ = Describe("Tests for POC1Chaincode", func() {
 			})
 
 			It("Should unsuccessfully execute fulfillOrder due to already completed", func() {
-				orderStruct = utils.CreateOrder(stub, assetPayload.Id)
-
-				orderFulfillment = dto.OrderFulfillmentDto{
-					Id:     orderStruct.Id,
-					Status: true}
-				jsonOrderFulfillment, _ := json.Marshal(orderFulfillment)
-
 				result = stub.MockInvoke("000", [][]byte{
 					[]byte(constants.FulfillOrder),
 					jsonOrderFulfillment})
@@ -343,11 +339,11 @@ var _ = Describe("Tests for POC1Chaincode", func() {
 			})
 
 			It("Should unsuccessfully execute fulfillOrder due to already completed", func() {
-				orderStruct = utils.CreateOrder(stub, assetPayload.Id)
-
 				orderFulfillment = dto.OrderFulfillmentDto{
+
 					Id:     orderStruct.Id,
-					Status: false}
+					Status: false,
+				}
 				jsonOrderFulfillment, _ := json.Marshal(orderFulfillment)
 
 				result = stub.MockInvoke("000", [][]byte{
