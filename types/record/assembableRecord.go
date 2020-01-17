@@ -1,13 +1,13 @@
 package record
 
 type AssembableRecord struct {
-	*Record
+	*BaseRecord
 	AssembledFrom RecordParts `json:"assembledFrom,omitempty"`
 }
 
-func NewAssembableRecord(rec *Record, recordParts RecordParts) *AssembableRecord {
+func NewAssembableRecord(rec *BaseRecord, recordParts RecordParts) *AssembableRecord {
 	return &AssembableRecord{
-		Record:        rec,
+		BaseRecord:    rec,
 		AssembledFrom: recordParts,
 	}
 }

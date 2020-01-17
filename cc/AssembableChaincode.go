@@ -16,8 +16,8 @@ type AssembableChaincode struct {
 	BaseSupplyChainChaincode
 }
 
-func (acc *AssembableChaincode) Manufacture(id string, assembableRecordDto dto.AssembableRecordDto) *record.AssembableRecord {
-	rec := acc.BaseSupplyChainChaincode.Manufacture(id, assembableRecordDto.RecordDto)
+func (acc *AssembableChaincode) Manufacture(id string, assembableRecordDto *dto.AssembableRecordDto) *record.AssembableRecord {
+	rec := acc.BaseSupplyChainChaincode.Manufacture(id, assembableRecordDto.BaseRecordDto)
 
 	records := record.RecordParts(assembableRecordDto.AssembledFrom)
 	return record.NewAssembableRecord(rec, records)
@@ -25,7 +25,7 @@ func (acc *AssembableChaincode) Manufacture(id string, assembableRecordDto dto.A
 
 func (acc *AssembableChaincode) Assemble(stub shim.ChaincodeStubInterface, id string, assembleRequest *dto.AssembleRequestDto, ) (*record.AssembableRecord, record.RecordParts, error) {
 	newRecord := record.AssembableRecord{
-		Record: &record.Record{
+		BaseRecord: &record.BaseRecord{
 			Id:          id,
 			BatchId:     assembleRequest.BatchId,
 			Owner:       utils.GetOrganization(stub, constants.Org2Index),
@@ -43,7 +43,7 @@ func (acc *AssembableChaincode) Assemble(stub shim.ChaincodeStubInterface, id st
 			return nil, nil, errors.New(fmt.Sprintf(constants.ErrorRecordIdNotFound, recordElem.Id))
 		}
 
-		recordStruct := record.Record{}
+		recordStruct := record.BaseRecord{}
 		err := json.Unmarshal(recordBytes, &recordStruct)
 
 		if err != nil {

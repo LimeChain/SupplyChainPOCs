@@ -16,7 +16,7 @@ func (abcc *AssetBoundChaincode) AddAssetType(id string, assetDto *dto.AssetDto)
 }
 
 func (abcc *AssetBoundChaincode) Manufacture(id string, assetBoundRecordDto *dto.AssetBoundRecordDto) *record.AssetBoundRecord {
-	rec := abcc.BaseSupplyChainChaincode.Manufacture(id, assetBoundRecordDto.RecordDto)
+	rec := abcc.BaseSupplyChainChaincode.Manufacture(id, assetBoundRecordDto.BaseRecordDto)
 
 	return record.NewAssetBoundRecord(rec, assetBoundRecordDto.AssetId)
 }

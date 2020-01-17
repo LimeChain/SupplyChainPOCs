@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"github.com/LimeChain/SupplyChainPOCs"
 	"github.com/LimeChain/SupplyChainPOCs/constants"
+	"github.com/LimeChain/SupplyChainPOCs/examples/poc01"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 

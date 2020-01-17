@@ -1,13 +1,13 @@
 package record
 
 type AssetBoundRecord struct {
-	*Record
+	*BaseRecord
 	AssetId string `json:"assetId,omitempty"`
 }
 
-func NewAssetBoundRecord(rec *Record, assetId string) *AssetBoundRecord {
+func NewAssetBoundRecord(rec *BaseRecord, assetId string) *AssetBoundRecord {
 	return &AssetBoundRecord{
-		Record:  rec,
-		AssetId: assetId,
+		BaseRecord: rec,
+		AssetId:    assetId,
 	}
 }

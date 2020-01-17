@@ -237,7 +237,7 @@ func (poccc *POC1Chaincode) fulfillOrder(stub shim.ChaincodeStubInterface, args 
 		recordStruct.DecreaseQuantity(recordElem.Quantity)
 
 		newRecordStruct := record.AssetBoundRecord{
-			Record: &record.Record{
+			BaseRecord: &record.BaseRecord{
 				BatchId:         recordStruct.BatchId,
 				CreationOrderId: orderStruct.Id,
 				Owner:           orderStruct.BuyerId,
@@ -374,7 +374,7 @@ func (poccc *POC1Chaincode) sell(stub shim.ChaincodeStubInterface, args []string
 		return shim.Error(fmt.Sprintf(constants.ErrorRecordIdNotFound, sellRequest.RecordId))
 	}
 
-	recordStruct := record.Record{}
+	recordStruct := record.BaseRecord{}
 	err = json.Unmarshal(recordBytes, &recordStruct)
 
 	if err != nil {

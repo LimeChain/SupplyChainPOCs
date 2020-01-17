@@ -11,7 +11,7 @@ const (
 	ErrorRecordIdNotFound       = "Record with Id: %s not found"
 	ErrorRecordQuantity         = "Insufficient quantity for Record with Id: %s"
 	ErrorRecordDifferentAssetId = "Record with Id: %s has AssetId: %s, and not AssetId: %s"
-	ErrorStartChaincode         = "Error starting poc01: %s"
+	ErrorStartChaincode         = "Error starting chaincode: %s"
 )
 
 // Response Statuses

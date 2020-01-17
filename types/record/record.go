@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-type Record struct {
+type BaseRecord struct {
 	Id              string    `json:"id,omitempty"`
 	BatchId         string    `json:"batchId,omitempty"`
 	Owner           string    `json:"owner,omitempty"`
@@ -15,8 +15,8 @@ type Record struct {
 	CreationOrderId string    `json:"creationOrderId,omitempty"`
 }
 
-func NewRecord(id string, dto *dto.RecordDto) *Record {
-	return &Record{
+func NewRecord(id string, dto *dto.BaseRecordDto) *BaseRecord {
+	return &BaseRecord{
 		Id:          id,
 		BatchId:     dto.BatchId,
 		Owner:       dto.Owner,
@@ -25,20 +25,20 @@ func NewRecord(id string, dto *dto.RecordDto) *Record {
 	}
 }
 
-func (record *Record) DecreaseQuantity(quantity uint64) {
+func (record *BaseRecord) DecreaseQuantity(quantity uint64) {
 	record.Quantity -= quantity
 	record.update()
 }
 
-func (record *Record) SetQuantity(quantity uint64) {
+func (record *BaseRecord) SetQuantity(quantity uint64) {
 	record.Quantity = quantity
 	record.update()
 }
 
-func (record *Record) GetNewQuantity(subtractAmount uint64) uint64 {
+func (record *BaseRecord) GetNewQuantity(subtractAmount uint64) uint64 {
 	return record.Quantity - subtractAmount
 }
 
-func (record *Record) update() {
+func (record *BaseRecord) update() {
 	record.LastUpdated = time.Now()
 }

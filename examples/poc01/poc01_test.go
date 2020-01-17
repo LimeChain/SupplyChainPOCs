@@ -3,6 +3,7 @@ package poc01_test
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/LimeChain/SupplyChainPOCs/examples/poc01"
 	"github.com/LimeChain/SupplyChainPOCs/types/asset"
 	"github.com/LimeChain/SupplyChainPOCs/types/dto"
 	"github.com/LimeChain/SupplyChainPOCs/types/order"
@@ -12,7 +13,6 @@ import (
 	"github.com/shopspring/decimal"
 	"testing"
 
-	"github.com/LimeChain/SupplyChainPOCs"
 	"github.com/LimeChain/SupplyChainPOCs/constants"
 	"github.com/LimeChain/SupplyChainPOCs/utils"
 
@@ -117,7 +117,7 @@ var _ = Describe("Tests for POC1Chaincode", func() {
 				assetPayload := utils.CreateAsset(stub, &assetDto)
 
 				recordDto = dto.AssetBoundRecordDto{
-					RecordDto: &dto.RecordDto{
+					BaseRecordDto: &dto.BaseRecordDto{
 						BatchId:  constants.ExampleBatchId,
 						Owner:    constants.OrgOne,
 						Quantity: constants.ExampleQuantity,
@@ -143,7 +143,7 @@ var _ = Describe("Tests for POC1Chaincode", func() {
 
 			It("Should unsuccessfully execute manufacture due to invalid AssetId", func() {
 				recordDto = dto.AssetBoundRecordDto{
-					RecordDto: &dto.RecordDto{
+					BaseRecordDto: &dto.BaseRecordDto{
 						BatchId:  constants.ExampleBatchId,
 						Owner:    constants.OrgOne,
 						Quantity: constants.ExampleQuantity,
@@ -356,7 +356,7 @@ var _ = Describe("Tests for POC1Chaincode", func() {
 
 		Describe("assemble functionality", func() {
 			var assembleRequest dto.AssembleRequestDto
-			var recordPayload record.Record
+			var recordPayload record.BaseRecord
 			var assetPayload asset.Asset
 
 			BeforeEach(func() {
@@ -368,7 +368,7 @@ var _ = Describe("Tests for POC1Chaincode", func() {
 
 				recordDto := dto.AssetBoundRecordDto{
 					AssetId: assetPayload.Id,
-					RecordDto: &dto.RecordDto{
+					BaseRecordDto: &dto.BaseRecordDto{
 						BatchId:  constants.ExampleBatchId,
 						Owner:    constants.OrgOne,
 						Quantity: constants.ExampleQuantity,
@@ -474,7 +474,7 @@ var _ = Describe("Tests for POC1Chaincode", func() {
 
 				record2Dto := dto.AssetBoundRecordDto{
 					AssetId: assetPayloadTwo.Id,
-					RecordDto: &dto.RecordDto{
+					BaseRecordDto: &dto.BaseRecordDto{
 						BatchId:  constants.ExampleBatchId,
 						Owner:    constants.OrgOne,
 						Quantity: constants.ExampleQuantity,
@@ -486,7 +486,7 @@ var _ = Describe("Tests for POC1Chaincode", func() {
 					[]byte(constants.Manufacture),
 					jsonRecordDto,
 				})
-				var recordPayloadTwo record.Record
+				var recordPayloadTwo record.BaseRecord
 				json.Unmarshal(result.Payload, &recordPayloadTwo)
 
 				assembleRequest = dto.AssembleRequestDto{
@@ -520,7 +520,7 @@ var _ = Describe("Tests for POC1Chaincode", func() {
 
 		Describe("sell functionality", func() {
 			var sellRequest dto.SellDto
-			var recordPayload record.Record
+			var recordPayload record.BaseRecord
 
 			BeforeEach(func() {
 				assetDto := dto.AssetDto{
@@ -531,7 +531,7 @@ var _ = Describe("Tests for POC1Chaincode", func() {
 
 				recordDto := dto.AssetBoundRecordDto{
 					AssetId: assetPayload.Id,
-					RecordDto: &dto.RecordDto{
+					BaseRecordDto: &dto.BaseRecordDto{
 						BatchId:  constants.ExampleBatchId,
 						Owner:    constants.OrgOne,
 						Quantity: constants.ExampleQuantity,
@@ -609,7 +609,7 @@ var _ = Describe("Tests for POC1Chaincode", func() {
 
 				Expect(result.Status).To(Equal(constants.Status200))
 
-				payload := record.Record{}
+				payload := record.BaseRecord{}
 				json.Unmarshal(result.Payload, &payload)
 
 				Expect(payload.Quantity).To(Equal(uint64(0)))

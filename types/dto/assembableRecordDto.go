@@ -1,6 +1,6 @@
 package dto
 
 type AssembableRecordDto struct {
-	*RecordDto
+	*BaseRecordDto
 	AssembledFrom RecordPartsDto `json:"assembledFrom,omitempty"`
 }
