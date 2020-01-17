@@ -250,14 +250,14 @@ func (poccc *POC1_1_Chaincode) fulfillOrder(stub shim.ChaincodeStubInterface, ar
 		}
 
 		newRecordStruct := CertifiedRecord{
+			BaseRecord: &recordBase,
 			AssembableRecord: &record.AssembableRecord{
-				BaseRecord:    &recordBase,
 				AssembledFrom: recordStruct.AssembledFrom,
 			},
 			AssetBoundRecord: &record.AssetBoundRecord{
-				BaseRecord: &recordBase,
 				AssetId:    recordStruct.AssetId,
 			},
+			QualityCertificates: recordStruct.QualityCertificates,
 		}
 
 		if err != nil {
