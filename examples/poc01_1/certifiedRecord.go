@@ -6,17 +6,17 @@ import (
 
 type CertifiedRecord struct {
 	*record.BaseRecord
-	*record.AssembableRecord
+	*record.ComposableRecord
 	*record.AssetBoundRecord
 	QualityCertificates []string `json:"qualityCertificates,omitempty"`
 }
 
-func NewCertifiedRecord(recordStruct *record.BaseRecord, assetId string, assembledFrom record.RecordParts, qualityCertificates []string) *CertifiedRecord {
-	result := &CertifiedRecord{
+func NewCertifiedRecord(recordStruct *record.BaseRecord, assetId string, composedFrom record.RecordParts, qualityCertificates []string) *CertifiedRecord {
+	return &CertifiedRecord{
 		BaseRecord: recordStruct,
-		AssembableRecord: &record.AssembableRecord{
-			BaseRecord:    nil,
-			AssembledFrom: assembledFrom,
+		ComposableRecord: &record.ComposableRecord{
+			BaseRecord:   nil,
+			ComposedFrom: composedFrom,
 		},
 		AssetBoundRecord: &record.AssetBoundRecord{
 			BaseRecord: nil,
@@ -24,6 +24,4 @@ func NewCertifiedRecord(recordStruct *record.BaseRecord, assetId string, assembl
 		},
 		QualityCertificates: qualityCertificates,
 	}
-
-	return result
 }

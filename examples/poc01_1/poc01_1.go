@@ -16,7 +16,7 @@ import (
 
 type POC1_1_Chaincode struct {
 	cc.AssetBoundChaincode
-	cc.AssembableChaincode
+	cc.ComposableChaincode
 }
 
 func (poccc *POC1_1_Chaincode) Init(stub shim.ChaincodeStubInterface) peer.Response {
@@ -47,14 +47,14 @@ func (poccc *POC1_1_Chaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Res
 	switch funcName {
 	case constants.AddAssetType:
 		return poccc.addAssetType(stub, args)
-	case constants.Manufacture:
-		return poccc.manufacture(stub, args)
+	case constants.Create:
+		return poccc.create(stub, args)
 	case constants.PlaceOrder:
 		return poccc.placeOrder(stub, args)
 	case constants.FulfillOrder:
 		return poccc.fulfillOrder(stub, args)
-	case constants.Assemble:
-		return poccc.assemble(stub, args)
+	case constants.Compose:
+		return poccc.compose(stub, args)
 	case constants.Sell:
 		return poccc.sell(stub, args)
 	case constants.Query:
@@ -98,7 +98,7 @@ func (poccc *POC1_1_Chaincode) addAssetType(stub shim.ChaincodeStubInterface, ar
 	return shim.Success(jsonAsset)
 }
 
-func (poccc *POC1_1_Chaincode) manufacture(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+func (poccc *POC1_1_Chaincode) create(stub shim.ChaincodeStubInterface, args []string) peer.Response {
 	if len(args) != 1 {
 		return shim.Error(constants.ErrorArgumentsLength)
 	}
@@ -122,9 +122,9 @@ func (poccc *POC1_1_Chaincode) manufacture(stub shim.ChaincodeStubInterface, arg
 		return shim.Error(err.Error())
 	}
 
-	baseRecord := poccc.AssembableChaincode.BaseSupplyChainChaincode.Manufacture(recordId, recordDto.BaseRecordDto)
+	baseRecord := poccc.ComposableChaincode.BaseSupplyChainChaincode.Create(recordId, recordDto.BaseRecordDto)
 
-	recordStruct := NewCertifiedRecord(baseRecord, recordDto.AssetId, record.RecordParts(recordDto.AssembledFrom), recordDto.QualityCertificates)
+	recordStruct := NewCertifiedRecord(baseRecord, recordDto.AssetId, record.RecordParts(recordDto.ComposedFrom), recordDto.QualityCertificates)
 
 	jsonRecord, err := json.Marshal(recordStruct)
 
@@ -251,11 +251,11 @@ func (poccc *POC1_1_Chaincode) fulfillOrder(stub shim.ChaincodeStubInterface, ar
 
 		newRecordStruct := CertifiedRecord{
 			BaseRecord: &recordBase,
-			AssembableRecord: &record.AssembableRecord{
-				AssembledFrom: recordStruct.AssembledFrom,
+			ComposableRecord: &record.ComposableRecord{
+				ComposedFrom: recordStruct.ComposedFrom,
 			},
 			AssetBoundRecord: &record.AssetBoundRecord{
-				AssetId:    recordStruct.AssetId,
+				AssetId: recordStruct.AssetId,
 			},
 			QualityCertificates: recordStruct.QualityCertificates,
 		}
@@ -305,26 +305,26 @@ func (poccc *POC1_1_Chaincode) fulfillOrder(stub shim.ChaincodeStubInterface, ar
 	return shim.Success(jsonOrder)
 }
 
-func (poccc *POC1_1_Chaincode) assemble(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+func (poccc *POC1_1_Chaincode) compose(stub shim.ChaincodeStubInterface, args []string) peer.Response {
 	if len(args) != 1 {
 		return shim.Error(constants.ErrorArgumentsLength)
 	}
 
-	assembleRequest := dto.AssembleRequestDto{}
-	err := json.Unmarshal([]byte(args[0]), &assembleRequest)
+	composeRequest := dto.ComposeRequestDto{}
+	err := json.Unmarshal([]byte(args[0]), &composeRequest)
 
 	if err != nil {
 		return shim.Error(err.Error())
 	}
 
-	assetBytes, _ := stub.GetState(assembleRequest.AssetId)
+	assetBytes, _ := stub.GetState(composeRequest.AssetId)
 
 	if len(assetBytes) == 0 {
-		return shim.Error(fmt.Sprintf(constants.ErrorAssetIdNotFound, assembleRequest.AssetId))
+		return shim.Error(fmt.Sprintf(constants.ErrorAssetIdNotFound, composeRequest.AssetId))
 	}
 
 	newRecordId, err := utils.CreateCompositeKey(stub, constants.PrefixRecord)
-	newRecord, updatedRecords, err := poccc.AssembableChaincode.Assemble(stub, newRecordId, &assembleRequest)
+	newRecord, updatedRecords, err := poccc.ComposableChaincode.Compose(stub, newRecordId, &composeRequest)
 
 	if err != nil {
 		return shim.Error(err.Error())
@@ -333,7 +333,7 @@ func (poccc *POC1_1_Chaincode) assemble(stub shim.ChaincodeStubInterface, args [
 	for _, updatedRecord := range updatedRecords {
 		recordBytes, _ := stub.GetState(updatedRecord.Id)
 
-		recordStruct := record.AssembableRecord{}
+		recordStruct := record.ComposableRecord{}
 
 		err := json.Unmarshal(recordBytes, &recordStruct)
 

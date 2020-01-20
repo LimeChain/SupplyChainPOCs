@@ -104,11 +104,11 @@ var _ = Describe("Tests for POC1_1_Chaincode", func() {
 			})
 		})
 
-		Describe("manufacture functionality", func() {
+		Describe("create functionality", func() {
 			var payload poc01_1.CertifiedRecord
 			var recordDto poc01_1.CertifiedRecordDto
 
-			It("Should successfully execute manufacture", func() {
+			It("Should successfully execute create", func() {
 				assetDto := dto.AssetDto{
 					Description: constants.ExampleDescription,
 					IsActive:    true}
@@ -121,8 +121,8 @@ var _ = Describe("Tests for POC1_1_Chaincode", func() {
 						Owner:    constants.OrgOne,
 						Quantity: constants.ExampleQuantity,
 					},
-					AssembableRecordDto: &dto.AssembableRecordDto{
-						AssembledFrom: dto.RecordPartsDto{
+					ComposableRecordDto: &dto.ComposableRecordDto{
+						ComposedFrom: dto.RecordPartsDto{
 							{
 								Id:       constants.ExampleRecordId,
 								Quantity: constants.ExampleQuantity},
@@ -138,7 +138,7 @@ var _ = Describe("Tests for POC1_1_Chaincode", func() {
 
 				jsonRecord, _ := json.Marshal(recordDto)
 				result = stub.MockInvoke("000", [][]byte{
-					[]byte(constants.Manufacture),
+					[]byte(constants.Create),
 					jsonRecord})
 
 				Expect(result.Status).To(Equal(constants.Status200))
@@ -151,8 +151,8 @@ var _ = Describe("Tests for POC1_1_Chaincode", func() {
 				Expect(payload.BaseRecord.Owner).To(Equal(recordDto.BaseRecordDto.Owner))
 				Expect(payload.BaseRecord.Quantity).To(Equal(recordDto.BaseRecordDto.Quantity))
 
-				for index, _ := range payload.AssembledFrom {
-					Expect(payload.AssembledFrom[index]).To(Equal(recordDto.AssembledFrom[index]))
+				for index, _ := range payload.ComposedFrom {
+					Expect(payload.ComposedFrom[index]).To(Equal(recordDto.ComposedFrom[index]))
 				}
 
 				for index, _ := range payload.QualityCertificates {
@@ -160,27 +160,27 @@ var _ = Describe("Tests for POC1_1_Chaincode", func() {
 				}
 			})
 
-			It("Should unsuccessfully execute manufacture due to invalid AssetId", func() {
+			It("Should unsuccessfully execute create due to invalid AssetId", func() {
 				recordDto = poc01_1.CertifiedRecordDto{
 					BaseRecordDto: &dto.BaseRecordDto{
 						BatchId:  constants.ExampleBatchId,
 						Owner:    constants.OrgOne,
 						Quantity: constants.ExampleQuantity,
 					},
-					AssembableRecordDto: &dto.AssembableRecordDto{
-						AssembledFrom: dto.RecordPartsDto{},
+					ComposableRecordDto: &dto.ComposableRecordDto{
+						ComposedFrom: dto.RecordPartsDto{},
 					},
 					AssetBoundRecordDto: &dto.AssetBoundRecordDto{
 						AssetId: constants.ExampleAssetId,
 					},
 					QualityCertificates: []string{
-						constants.ExampleTest, constants.Manufacture,
+						constants.ExampleTest, constants.Create,
 					},
 				}
 
 				jsonRecord, _ := json.Marshal(recordDto)
 				result = stub.MockInvoke("000", [][]byte{
-					[]byte(constants.Manufacture),
+					[]byte(constants.Create),
 					jsonRecord})
 
 				Expect(result.Status).To(Equal(constants.Status500))
@@ -189,17 +189,17 @@ var _ = Describe("Tests for POC1_1_Chaincode", func() {
 				Expect(result.Message).To(Equal(expectedMessage))
 			})
 
-			It("Should unsuccessfully execute manufacture due to invalid arguments length", func() {
+			It("Should unsuccessfully execute create due to invalid arguments length", func() {
 				result = stub.MockInvoke("000", [][]byte{
-					[]byte(constants.Manufacture)})
+					[]byte(constants.Create)})
 
 				Expect(result.Status).To(Equal(constants.Status500))
 				Expect(result.Message).To(Equal(constants.ErrorArgumentsLength))
 			})
 
-			It("Should unsuccessfully execute manufacture due to invalid argument", func() {
+			It("Should unsuccessfully execute create due to invalid argument", func() {
 				result = stub.MockInvoke("000", [][]byte{
-					[]byte(constants.Manufacture),
+					[]byte(constants.Create),
 					[]byte(constants.ExampleTest)})
 
 				Expect(result.Status).To(Equal(constants.Status500))
@@ -249,7 +249,7 @@ var _ = Describe("Tests for POC1_1_Chaincode", func() {
 
 			It("Should unsuccessfully execute placecOrder due to invalid arguments length", func() {
 				result = stub.MockInvoke("000", [][]byte{
-					[]byte(constants.Manufacture)})
+					[]byte(constants.Create)})
 
 				Expect(result.Status).To(Equal(constants.Status500))
 				Expect(result.Message).To(Equal(constants.ErrorArgumentsLength))
@@ -257,7 +257,7 @@ var _ = Describe("Tests for POC1_1_Chaincode", func() {
 
 			It("Should unsuccessfully execute placeOrder due to invalid argument", func() {
 				result = stub.MockInvoke("000", [][]byte{
-					[]byte(constants.Manufacture),
+					[]byte(constants.Create),
 					[]byte(constants.ExampleTest)})
 
 				Expect(result.Status).To(Equal(constants.Status500))
@@ -380,8 +380,8 @@ var _ = Describe("Tests for POC1_1_Chaincode", func() {
 			})
 		})
 
-		Describe("assemble functionality", func() {
-			var assembleRequest dto.AssembleRequestDto
+		Describe("compose functionality", func() {
+			var composeRequest dto.ComposeRequestDto
 			var recordPayload poc01_1.CertifiedRecord
 			var assetPayload asset.Asset
 
@@ -401,8 +401,8 @@ var _ = Describe("Tests for POC1_1_Chaincode", func() {
 					AssetBoundRecordDto: &dto.AssetBoundRecordDto{
 						AssetId: assetPayload.Id,
 					},
-					AssembableRecordDto: &dto.AssembableRecordDto{
-						AssembledFrom: dto.RecordPartsDto{{}},
+					ComposableRecordDto: &dto.ComposableRecordDto{
+						ComposedFrom: dto.RecordPartsDto{{}},
 					},
 					QualityCertificates: []string{
 						constants.ExampleTest,
@@ -412,7 +412,7 @@ var _ = Describe("Tests for POC1_1_Chaincode", func() {
 				jsonRecordDto, _ := json.Marshal(recordDto)
 
 				result := stub.MockInvoke("000", [][]byte{
-					[]byte(constants.Manufacture),
+					[]byte(constants.Create),
 					jsonRecordDto,
 				})
 
@@ -421,43 +421,43 @@ var _ = Describe("Tests for POC1_1_Chaincode", func() {
 				assetPayload = utils.CreateAsset(stub, &asset)
 			})
 
-			It("Should unsuccessfully execute assemble due to invalid arguments length", func() {
+			It("Should unsuccessfully execute compose due to invalid arguments length", func() {
 				result = stub.MockInvoke("000", [][]byte{
-					[]byte(constants.Assemble)})
+					[]byte(constants.Compose)})
 
 				Expect(result.Status).To(Equal(constants.Status500))
 				Expect(result.Message).To(Equal(constants.ErrorArgumentsLength))
 			})
 
-			It("Should unsuccessfully execute assemble due to invalid argument", func() {
+			It("Should unsuccessfully execute compose due to invalid argument", func() {
 				result = stub.MockInvoke("000", [][]byte{
-					[]byte(constants.Assemble),
+					[]byte(constants.Compose),
 					[]byte(constants.ExampleTest)})
 
 				Expect(result.Status).To(Equal(constants.Status500))
 			})
 
-			It("Should unsuccessfully execute assemble due to invalid asset id", func() {
-				assembleRequest = dto.AssembleRequestDto{
+			It("Should unsuccessfully execute compose due to invalid asset id", func() {
+				composeRequest = dto.ComposeRequestDto{
 					AssetId:  constants.ExampleAssetId,
 					BatchId:  constants.ExampleBatchId,
 					Quantity: constants.ExampleQuantity,
 				}
 
-				jsonAssembleRequest, _ := json.Marshal(assembleRequest)
+				jsonComposeRequest, _ := json.Marshal(composeRequest)
 
 				result = stub.MockInvoke("000", [][]byte{
-					[]byte(constants.Assemble),
-					jsonAssembleRequest})
+					[]byte(constants.Compose),
+					jsonComposeRequest})
 
 				Expect(result.Status).To(Equal(constants.Status500))
 
-				expectedMessage := fmt.Sprintf(constants.ErrorAssetIdNotFound, assembleRequest.AssetId)
+				expectedMessage := fmt.Sprintf(constants.ErrorAssetIdNotFound, composeRequest.AssetId)
 				Expect(result.Message).To(Equal(expectedMessage))
 			})
 
-			It("Should unsuccessfully execute assemble due to invalid record id", func() {
-				assembleRequest = dto.AssembleRequestDto{
+			It("Should unsuccessfully execute compose due to invalid record id", func() {
+				composeRequest = dto.ComposeRequestDto{
 					AssetId:  assetPayload.Id,
 					BatchId:  constants.ExampleBatchId,
 					Quantity: constants.ExampleQuantity,
@@ -466,20 +466,20 @@ var _ = Describe("Tests for POC1_1_Chaincode", func() {
 							Id:       constants.ExampleRecordId,
 							Quantity: constants.ExampleQuantity}}}
 
-				jsonAssembleRequest, _ := json.Marshal(assembleRequest)
+				jsonComposeRequest, _ := json.Marshal(composeRequest)
 
 				result = stub.MockInvoke("000", [][]byte{
-					[]byte(constants.Assemble),
-					jsonAssembleRequest})
+					[]byte(constants.Compose),
+					jsonComposeRequest})
 
 				Expect(result.Status).To(Equal(constants.Status500))
 
-				expectedMessage := fmt.Sprintf(constants.ErrorRecordIdNotFound, assembleRequest.Records[0].Id)
+				expectedMessage := fmt.Sprintf(constants.ErrorRecordIdNotFound, composeRequest.Records[0].Id)
 				Expect(result.Message).To(Equal(expectedMessage))
 			})
 
-			It("Should unsuccessfully execute assemble due to invalid record quantity", func() {
-				assembleRequest = dto.AssembleRequestDto{
+			It("Should unsuccessfully execute compose due to invalid record quantity", func() {
+				composeRequest = dto.ComposeRequestDto{
 					AssetId:  assetPayload.Id,
 					BatchId:  constants.ExampleBatchId,
 					Quantity: constants.ExampleQuantity,
@@ -488,19 +488,19 @@ var _ = Describe("Tests for POC1_1_Chaincode", func() {
 							Id:       recordPayload.Id,
 							Quantity: recordPayload.Quantity + 1}}}
 
-				jsonAssembleRequest, _ := json.Marshal(assembleRequest)
+				jsonComposeRequest, _ := json.Marshal(composeRequest)
 
 				result = stub.MockInvoke("000", [][]byte{
-					[]byte(constants.Assemble),
-					jsonAssembleRequest})
+					[]byte(constants.Compose),
+					jsonComposeRequest})
 
 				Expect(result.Status).To(Equal(constants.Status500))
 
-				expectedMessage := fmt.Sprintf(constants.ErrorRecordQuantity, assembleRequest.Records[0].Id)
+				expectedMessage := fmt.Sprintf(constants.ErrorRecordQuantity, composeRequest.Records[0].Id)
 				Expect(result.Message).To(Equal(expectedMessage))
 			})
 
-			It("Should successfully execute assemble", func() {
+			It("Should successfully execute compose", func() {
 				asset := dto.AssetDto{
 					Description: constants.ExampleDescription,
 					IsActive:    true}
@@ -516,21 +516,21 @@ var _ = Describe("Tests for POC1_1_Chaincode", func() {
 						Owner:    constants.OrgOne,
 						Quantity: constants.ExampleQuantity,
 					},
-					AssembableRecordDto: &dto.AssembableRecordDto{
-						AssembledFrom: dto.RecordPartsDto{{}},
+					ComposableRecordDto: &dto.ComposableRecordDto{
+						ComposedFrom: dto.RecordPartsDto{{}},
 					},
 					QualityCertificates: []string{constants.ExampleTest}}
 
 				jsonRecordDto, _ := json.Marshal(record2Dto)
 
 				result := stub.MockInvoke("000", [][]byte{
-					[]byte(constants.Manufacture),
+					[]byte(constants.Create),
 					jsonRecordDto,
 				})
 				var recordPayloadTwo record.BaseRecord
 				json.Unmarshal(result.Payload, &recordPayloadTwo)
 
-				assembleRequest = dto.AssembleRequestDto{
+				composeRequest = dto.ComposeRequestDto{
 					AssetId:  assetPayload.Id,
 					BatchId:  constants.ExampleBatchId,
 					Quantity: constants.ExampleQuantity,
@@ -542,19 +542,19 @@ var _ = Describe("Tests for POC1_1_Chaincode", func() {
 							Id:       recordPayloadTwo.Id,
 							Quantity: recordPayloadTwo.Quantity}}}
 
-				jsonAssembleRequest, _ := json.Marshal(assembleRequest)
+				jsonComposeRequest, _ := json.Marshal(composeRequest)
 
 				result = stub.MockInvoke("000", [][]byte{
-					[]byte(constants.Assemble),
-					jsonAssembleRequest})
+					[]byte(constants.Compose),
+					jsonComposeRequest})
 
 				Expect(result.Status).To(Equal(constants.Status200))
 
-				payload := record.AssembableRecord{}
+				payload := record.ComposableRecord{}
 				json.Unmarshal(result.Payload, &payload)
-				Expect(payload.Quantity).To(Equal(assembleRequest.Quantity))
-				for index, _ := range payload.AssembledFrom {
-					Expect(payload.AssembledFrom[index]).To(Equal(assembleRequest.Records[index]))
+				Expect(payload.Quantity).To(Equal(composeRequest.Quantity))
+				for index, _ := range payload.ComposedFrom {
+					Expect(payload.ComposedFrom[index]).To(Equal(composeRequest.Records[index]))
 				}
 			})
 		})
@@ -579,15 +579,15 @@ var _ = Describe("Tests for POC1_1_Chaincode", func() {
 					AssetBoundRecordDto: &dto.AssetBoundRecordDto{
 						AssetId: assetPayload.Id,
 					},
-					AssembableRecordDto: &dto.AssembableRecordDto{
-						AssembledFrom: dto.RecordPartsDto{{}},
+					ComposableRecordDto: &dto.ComposableRecordDto{
+						ComposedFrom: dto.RecordPartsDto{{}},
 					},
 				}
 
 				jsonRecordDto, _ := json.Marshal(recordDto)
 
 				result := stub.MockInvoke("000", [][]byte{
-					[]byte(constants.Manufacture),
+					[]byte(constants.Create),
 					jsonRecordDto,
 				})
 

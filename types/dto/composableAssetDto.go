@@ -1,6 +1,6 @@
-package asset
+package dto
 
-type AssetAssemble []struct {
+type ComposableAssetDto []struct {
 	Id       string `json:"id,omitempty"`
 	Quantity uint64 `json:"quantity,omitempty"`
 }

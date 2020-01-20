@@ -34,10 +34,10 @@ const (
 // Chaincode Functions
 const (
 	AddAssetType = "addAssetType"
-	Assemble     = "assemble"
+	Compose      = "compose"
+	Create       = "create"
 	Init         = "init"
 	FulfillOrder = "fulfillOrder"
-	Manufacture  = "manufacture"
 	PlaceOrder   = "placeOrder"
 	Query        = "query"
 	Sell         = "sell"

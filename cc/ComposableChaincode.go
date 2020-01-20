@@ -12,31 +12,31 @@ import (
 	"time"
 )
 
-type AssembableChaincode struct {
+type ComposableChaincode struct {
 	BaseSupplyChainChaincode
 }
 
-func (acc *AssembableChaincode) Manufacture(id string, assembableRecordDto *dto.AssembableRecordDto) *record.AssembableRecord {
-	rec := acc.BaseSupplyChainChaincode.Manufacture(id, assembableRecordDto.BaseRecordDto)
+func (ccc *ComposableChaincode) Create(id string, composableRecordDto *dto.ComposableRecordDto) *record.ComposableRecord {
+	rec := ccc.BaseSupplyChainChaincode.Create(id, composableRecordDto.BaseRecordDto)
 
-	records := record.RecordParts(assembableRecordDto.AssembledFrom)
-	return record.NewAssembableRecord(rec, records)
+	records := record.RecordParts(composableRecordDto.ComposedFrom)
+	return record.NewComposableRecord(rec, records)
 }
 
-func (acc *AssembableChaincode) Assemble(stub shim.ChaincodeStubInterface, id string, assembleRequest *dto.AssembleRequestDto, ) (*record.AssembableRecord, record.RecordParts, error) {
-	newRecord := record.AssembableRecord{
+func (ccc *ComposableChaincode) Compose(stub shim.ChaincodeStubInterface, id string, composeRequest *dto.ComposeRequestDto) (*record.ComposableRecord, record.RecordParts, error) {
+	newRecord := record.ComposableRecord{
 		BaseRecord: &record.BaseRecord{
 			Id:          id,
-			BatchId:     assembleRequest.BatchId,
+			BatchId:     composeRequest.BatchId,
 			Owner:       utils.GetOrganization(stub, constants.Org2Index),
-			Quantity:    assembleRequest.Quantity,
+			Quantity:    composeRequest.Quantity,
 			DateCreated: time.Now(),
 		},
-		AssembledFrom: record.RecordParts{}}
+		ComposedFrom: record.RecordParts{}}
 
 	updatedRecords := record.RecordParts{}
 
-	for _, recordElem := range assembleRequest.Records {
+	for _, recordElem := range composeRequest.Records {
 		recordBytes, _ := stub.GetState(recordElem.Id)
 
 		if len(recordBytes) == 0 {
@@ -57,7 +57,7 @@ func (acc *AssembableChaincode) Assemble(stub shim.ChaincodeStubInterface, id st
 		updatedRecords = append(updatedRecords, record.RecordParts{
 			{Id: recordStruct.Id, Quantity: recordStruct.GetNewQuantity(recordElem.Quantity)}}...)
 
-		newRecord.AssembledFrom = append(newRecord.AssembledFrom, recordElem)
+		newRecord.ComposedFrom = append(newRecord.ComposedFrom, recordElem)
 	}
 
 	return &newRecord, updatedRecords, nil

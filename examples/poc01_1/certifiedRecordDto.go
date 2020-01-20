@@ -6,7 +6,7 @@ import (
 
 type CertifiedRecordDto struct {
 	*dto.BaseRecordDto
-	*dto.AssembableRecordDto
+	*dto.ComposableRecordDto
 	*dto.AssetBoundRecordDto
 	QualityCertificates []string `json:"qualityCertificates,omitempty"`
 }

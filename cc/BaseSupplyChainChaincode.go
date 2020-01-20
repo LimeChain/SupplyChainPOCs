@@ -9,7 +9,7 @@ import (
 type BaseSupplyChainChaincode struct {
 }
 
-func (bsccc *BaseSupplyChainChaincode) Manufacture(id string, dto *dto.BaseRecordDto) *record.BaseRecord {
+func (bsccc *BaseSupplyChainChaincode) Create(id string, dto *dto.BaseRecordDto) *record.BaseRecord {
 	return record.NewRecord(id, dto)
 }
 

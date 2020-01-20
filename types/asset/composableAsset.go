@@ -1,6 +1,6 @@
 package asset
 
-type ComposableAsset struct {
-	*Asset
-	AssembledFrom AssetAssemble `json:"assembledFrom,omitempty"`
+type ComposableAsset []struct {
+	Id       string `json:"id,omitempty"`
+	Quantity uint64 `json:"quantity,omitempty"`
 }
