@@ -608,6 +608,9 @@ var _ = Describe("Tests for TransparentSupplyChainChaincode 2", func() {
 					ComposableRecordDto: &dto.ComposableRecordDto{
 						ComposedFrom: dto.RecordPartsDto{{}},
 					},
+					QualityCertificates: []string{
+						constants.ExampleTest,
+					},
 				}
 
 				jsonRecordDto, _ := json.Marshal(recordDto)
