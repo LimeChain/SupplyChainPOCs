@@ -1,4 +1,4 @@
-package poc01_1
+package transparent_supply_chain_2
 
 import (
 	"encoding/json"
@@ -15,12 +15,12 @@ import (
 	"time"
 )
 
-type POC1_1_Chaincode struct {
+type TSCChaincode_2 struct {
 	cc.AssetBoundChaincode
 	cc.ComposableChaincode
 }
 
-func (poccc *POC1_1_Chaincode) Init(stub shim.ChaincodeStubInterface) peer.Response {
+func (tsccc *TSCChaincode_2) Init(stub shim.ChaincodeStubInterface) peer.Response {
 	_, args := stub.GetFunctionAndParameters()
 
 	if len(args) != 3 {
@@ -42,30 +42,30 @@ func (poccc *POC1_1_Chaincode) Init(stub shim.ChaincodeStubInterface) peer.Respo
 	return shim.Success(organizations)
 }
 
-func (poccc *POC1_1_Chaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Response {
+func (tsccc *TSCChaincode_2) Invoke(stub shim.ChaincodeStubInterface) peer.Response {
 	funcName, args := stub.GetFunctionAndParameters()
 
 	switch funcName {
 	case constants.AddAssetType:
-		return poccc.addAssetType(stub, args)
+		return tsccc.addAssetType(stub, args)
 	case examplesConstants.Assemble:
-		return poccc.assemble(stub, args)
+		return tsccc.assemble(stub, args)
 	case examplesConstants.Manufacture:
-		return poccc.manufacture(stub, args)
+		return tsccc.manufacture(stub, args)
 	case constants.PlaceOrder:
-		return poccc.placeOrder(stub, args)
+		return tsccc.placeOrder(stub, args)
 	case constants.FulfillOrder:
-		return poccc.fulfillOrder(stub, args)
+		return tsccc.fulfillOrder(stub, args)
 	case constants.Sell:
-		return poccc.sell(stub, args)
+		return tsccc.sell(stub, args)
 	case constants.Query:
-		return poccc.query(stub, args)
+		return tsccc.query(stub, args)
 	}
 
 	return shim.Error(fmt.Sprintf(constants.ErrorInvalidFunctionName, funcName))
 }
 
-func (poccc *POC1_1_Chaincode) addAssetType(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+func (tsccc *TSCChaincode_2) addAssetType(stub shim.ChaincodeStubInterface, args []string) peer.Response {
 	if len(args) != 1 {
 		return shim.Error(constants.ErrorArgumentsLength)
 	}
@@ -83,7 +83,7 @@ func (poccc *POC1_1_Chaincode) addAssetType(stub shim.ChaincodeStubInterface, ar
 		return shim.Error(err.Error())
 	}
 
-	assetStruct := poccc.AddAssetType(assetId, &assetDto)
+	assetStruct := tsccc.AddAssetType(assetId, &assetDto)
 
 	jsonAsset, err := json.Marshal(assetStruct)
 
@@ -92,6 +92,7 @@ func (poccc *POC1_1_Chaincode) addAssetType(stub shim.ChaincodeStubInterface, ar
 	}
 
 	err = stub.PutState(assetStruct.Id, jsonAsset)
+
 	if err != nil {
 		return shim.Error(err.Error())
 	}
@@ -99,7 +100,7 @@ func (poccc *POC1_1_Chaincode) addAssetType(stub shim.ChaincodeStubInterface, ar
 	return shim.Success(jsonAsset)
 }
 
-func (poccc *POC1_1_Chaincode) manufacture(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+func (tsccc *TSCChaincode_2) manufacture(stub shim.ChaincodeStubInterface, args []string) peer.Response {
 	if len(args) != 1 {
 		return shim.Error(constants.ErrorArgumentsLength)
 	}
@@ -123,7 +124,7 @@ func (poccc *POC1_1_Chaincode) manufacture(stub shim.ChaincodeStubInterface, arg
 		return shim.Error(err.Error())
 	}
 
-	baseRecord := poccc.ComposableChaincode.BaseSupplyChainChaincode.Create(recordId, recordDto.BaseRecordDto)
+	baseRecord := tsccc.ComposableChaincode.BaseSupplyChainChaincode.Create(recordId, recordDto.BaseRecordDto)
 
 	recordStruct := NewCertifiedRecord(baseRecord, recordDto.AssetId, record.RecordParts(recordDto.ComposedFrom), recordDto.QualityCertificates)
 
@@ -134,6 +135,7 @@ func (poccc *POC1_1_Chaincode) manufacture(stub shim.ChaincodeStubInterface, arg
 	}
 
 	err = stub.PutState(recordId, jsonRecord)
+
 	if err != nil {
 		return shim.Error(err.Error())
 	}
@@ -141,7 +143,7 @@ func (poccc *POC1_1_Chaincode) manufacture(stub shim.ChaincodeStubInterface, arg
 	return shim.Success(jsonRecord)
 }
 
-func (poccc *POC1_1_Chaincode) placeOrder(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+func (tsccc *TSCChaincode_2) placeOrder(stub shim.ChaincodeStubInterface, args []string) peer.Response {
 	if len(args) != 1 {
 		return shim.Error(constants.ErrorArgumentsLength)
 	}
@@ -165,7 +167,7 @@ func (poccc *POC1_1_Chaincode) placeOrder(stub shim.ChaincodeStubInterface, args
 		return shim.Error(err.Error())
 	}
 
-	orderStruct := poccc.AssetBoundChaincode.PlaceOrder(orderId, &assetBoundOrderDto)
+	orderStruct := tsccc.AssetBoundChaincode.PlaceOrder(orderId, &assetBoundOrderDto)
 
 	jsonOrder, err := json.Marshal(orderStruct)
 
@@ -181,7 +183,7 @@ func (poccc *POC1_1_Chaincode) placeOrder(stub shim.ChaincodeStubInterface, args
 	return shim.Success(jsonOrder)
 }
 
-func (poccc *POC1_1_Chaincode) fulfillOrder(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+func (tsccc *TSCChaincode_2) fulfillOrder(stub shim.ChaincodeStubInterface, args []string) peer.Response {
 	if len(args) != 1 {
 		return shim.Error(constants.ErrorArgumentsLength)
 	}
@@ -210,7 +212,7 @@ func (poccc *POC1_1_Chaincode) fulfillOrder(stub shim.ChaincodeStubInterface, ar
 		return shim.Error(fmt.Sprintf(constants.ErrorOrderIsFulfilled, orderFulfillmentDto.Id))
 	}
 
-	poccc.AssetBoundChaincode.FulfillOrder(orderStruct.Order, orderFulfillmentDto.Status)
+	tsccc.AssetBoundChaincode.FulfillOrder(orderStruct.Order, orderFulfillmentDto.Status)
 
 	if !orderStruct.IsCompleted {
 		return shim.Error(fmt.Sprintf(constants.ErrorOrderIsNotFulfilled, orderStruct.Id))
@@ -306,7 +308,7 @@ func (poccc *POC1_1_Chaincode) fulfillOrder(stub shim.ChaincodeStubInterface, ar
 	return shim.Success(jsonOrder)
 }
 
-func (poccc *POC1_1_Chaincode) assemble(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+func (tsccc *TSCChaincode_2) assemble(stub shim.ChaincodeStubInterface, args []string) peer.Response {
 	if len(args) != 1 {
 		return shim.Error(constants.ErrorArgumentsLength)
 	}
@@ -325,7 +327,7 @@ func (poccc *POC1_1_Chaincode) assemble(stub shim.ChaincodeStubInterface, args [
 	}
 
 	newRecordId, err := utils.CreateCompositeKey(stub, constants.PrefixRecord)
-	composedRecord, updatedRecords, err := poccc.ComposableChaincode.Compose(stub, newRecordId, composeRequest.ComposeRequestDto)
+	composedRecord, updatedRecords, err := tsccc.ComposableChaincode.Compose(stub, newRecordId, composeRequest.ComposeRequestDto)
 
 	if err != nil {
 		return shim.Error(err.Error())
@@ -370,7 +372,7 @@ func (poccc *POC1_1_Chaincode) assemble(stub shim.ChaincodeStubInterface, args [
 	return shim.Success(jsonNewRecord)
 }
 
-func (poccc *POC1_1_Chaincode) sell(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+func (tsccc *TSCChaincode_2) sell(stub shim.ChaincodeStubInterface, args []string) peer.Response {
 	if len(args) != 1 {
 		return shim.Error(constants.ErrorArgumentsLength)
 	}
@@ -416,7 +418,7 @@ func (poccc *POC1_1_Chaincode) sell(stub shim.ChaincodeStubInterface, args []str
 	return shim.Success(jsonRecord)
 }
 
-func (poccc *POC1_1_Chaincode) query(stub shim.ChaincodeStubInterface, args [] string) peer.Response {
+func (tsccc *TSCChaincode_2) query(stub shim.ChaincodeStubInterface, args [] string) peer.Response {
 	queryResults, err := utils.GetQueryResultForQueryString(stub, args[0])
 
 	if err != nil {

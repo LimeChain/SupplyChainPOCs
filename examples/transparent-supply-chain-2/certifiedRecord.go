@@ -1,4 +1,4 @@
-package poc01_1
+package transparent_supply_chain_2
 
 import (
 	"github.com/LimeChain/SupplyChainPOCs/types/record"

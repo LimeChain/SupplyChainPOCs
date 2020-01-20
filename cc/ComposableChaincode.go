@@ -18,8 +18,8 @@ type ComposableChaincode struct {
 
 func (ccc *ComposableChaincode) Create(id string, composableRecordDto *dto.ComposableRecordDto) *record.ComposableRecord {
 	rec := ccc.BaseSupplyChainChaincode.Create(id, composableRecordDto.BaseRecordDto)
-
 	records := record.RecordParts(composableRecordDto.ComposedFrom)
+
 	return record.NewComposableRecord(rec, records)
 }
 
