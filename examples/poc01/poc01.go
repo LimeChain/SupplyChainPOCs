@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/LimeChain/SupplyChainPOCs/cc"
 	"github.com/LimeChain/SupplyChainPOCs/constants"
+	examplesConstants "github.com/LimeChain/SupplyChainPOCs/examples/constants"
 	"github.com/LimeChain/SupplyChainPOCs/types/dto"
 	"github.com/LimeChain/SupplyChainPOCs/types/order"
 	"github.com/LimeChain/SupplyChainPOCs/types/record"
@@ -47,14 +48,14 @@ func (poccc *POC1Chaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respon
 	switch funcName {
 	case constants.AddAssetType:
 		return poccc.addAssetType(stub, args)
-	case constants.Create:
-		return poccc.create(stub, args)
+	case examplesConstants.Assemble:
+		return poccc.assemble(stub, args)
+	case examplesConstants.Manufacture:
+		return poccc.manufacture(stub, args)
 	case constants.PlaceOrder:
 		return poccc.placeOrder(stub, args)
 	case constants.FulfillOrder:
 		return poccc.fulfillOrder(stub, args)
-	case constants.Compose:
-		return poccc.compose(stub, args)
 	case constants.Sell:
 		return poccc.sell(stub, args)
 	case constants.Query:
@@ -98,7 +99,7 @@ func (poccc *POC1Chaincode) addAssetType(stub shim.ChaincodeStubInterface, args 
 	return shim.Success(jsonAsset)
 }
 
-func (poccc *POC1Chaincode) create(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+func (poccc *POC1Chaincode) manufacture(stub shim.ChaincodeStubInterface, args []string) peer.Response {
 	if len(args) != 1 {
 		return shim.Error(constants.ErrorArgumentsLength)
 	}
@@ -294,26 +295,26 @@ func (poccc *POC1Chaincode) fulfillOrder(stub shim.ChaincodeStubInterface, args 
 	return shim.Success(jsonOrder)
 }
 
-func (poccc *POC1Chaincode) compose(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+func (poccc *POC1Chaincode) assemble(stub shim.ChaincodeStubInterface, args []string) peer.Response {
 	if len(args) != 1 {
 		return shim.Error(constants.ErrorArgumentsLength)
 	}
 
-	composeRequest := dto.ComposeRequestDto{}
-	err := json.Unmarshal([]byte(args[0]), &composeRequest)
+	assetComposeRequest := dto.AssetComposeRequestDto{}
+	err := json.Unmarshal([]byte(args[0]), &assetComposeRequest)
 
 	if err != nil {
 		return shim.Error(err.Error())
 	}
 
-	assetBytes, _ := stub.GetState(composeRequest.AssetId)
+	assetBytes, _ := stub.GetState(assetComposeRequest.AssetId)
 
 	if len(assetBytes) == 0 {
-		return shim.Error(fmt.Sprintf(constants.ErrorAssetIdNotFound, composeRequest.AssetId))
+		return shim.Error(fmt.Sprintf(constants.ErrorAssetIdNotFound, assetComposeRequest.AssetId))
 	}
 
 	newRecordId, err := utils.CreateCompositeKey(stub, constants.PrefixRecord)
-	newRecord, updatedRecords, err := poccc.ComposableChaincode.Compose(stub, newRecordId, &composeRequest)
+	newRecord, updatedRecords, err := poccc.ComposableChaincode.Compose(stub, newRecordId, assetComposeRequest.ComposeRequestDto)
 
 	if err != nil {
 		return shim.Error(err.Error())

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/LimeChain/SupplyChainPOCs/cc"
 	"github.com/LimeChain/SupplyChainPOCs/constants"
+	examplesConstants "github.com/LimeChain/SupplyChainPOCs/examples/constants"
 	"github.com/LimeChain/SupplyChainPOCs/types/dto"
 	"github.com/LimeChain/SupplyChainPOCs/types/order"
 	"github.com/LimeChain/SupplyChainPOCs/types/record"
@@ -47,14 +48,14 @@ func (poccc *POC1_1_Chaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Res
 	switch funcName {
 	case constants.AddAssetType:
 		return poccc.addAssetType(stub, args)
-	case constants.Create:
-		return poccc.create(stub, args)
+	case examplesConstants.Assemble:
+		return poccc.assemble(stub, args)
+	case examplesConstants.Manufacture:
+		return poccc.manufacture(stub, args)
 	case constants.PlaceOrder:
 		return poccc.placeOrder(stub, args)
 	case constants.FulfillOrder:
 		return poccc.fulfillOrder(stub, args)
-	case constants.Compose:
-		return poccc.compose(stub, args)
 	case constants.Sell:
 		return poccc.sell(stub, args)
 	case constants.Query:
@@ -98,7 +99,7 @@ func (poccc *POC1_1_Chaincode) addAssetType(stub shim.ChaincodeStubInterface, ar
 	return shim.Success(jsonAsset)
 }
 
-func (poccc *POC1_1_Chaincode) create(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+func (poccc *POC1_1_Chaincode) manufacture(stub shim.ChaincodeStubInterface, args []string) peer.Response {
 	if len(args) != 1 {
 		return shim.Error(constants.ErrorArgumentsLength)
 	}
@@ -305,12 +306,12 @@ func (poccc *POC1_1_Chaincode) fulfillOrder(stub shim.ChaincodeStubInterface, ar
 	return shim.Success(jsonOrder)
 }
 
-func (poccc *POC1_1_Chaincode) compose(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+func (poccc *POC1_1_Chaincode) assemble(stub shim.ChaincodeStubInterface, args []string) peer.Response {
 	if len(args) != 1 {
 		return shim.Error(constants.ErrorArgumentsLength)
 	}
 
-	composeRequest := dto.ComposeRequestDto{}
+	composeRequest := CertifiedCombineRequestDto{}
 	err := json.Unmarshal([]byte(args[0]), &composeRequest)
 
 	if err != nil {
@@ -324,11 +325,13 @@ func (poccc *POC1_1_Chaincode) compose(stub shim.ChaincodeStubInterface, args []
 	}
 
 	newRecordId, err := utils.CreateCompositeKey(stub, constants.PrefixRecord)
-	newRecord, updatedRecords, err := poccc.ComposableChaincode.Compose(stub, newRecordId, &composeRequest)
+	composedRecord, updatedRecords, err := poccc.ComposableChaincode.Compose(stub, newRecordId, composeRequest.ComposeRequestDto)
 
 	if err != nil {
 		return shim.Error(err.Error())
 	}
+
+	newRecord := NewCertifiedRecord(composedRecord.BaseRecord, composeRequest.AssetId, composedRecord.ComposedFrom, composeRequest.QualityCertificates)
 
 	for _, updatedRecord := range updatedRecords {
 		recordBytes, _ := stub.GetState(updatedRecord.Id)
