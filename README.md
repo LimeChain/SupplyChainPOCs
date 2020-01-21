@@ -4,6 +4,13 @@
 SupplyKit is a library for supply chain based Hyperledger Fabric chaincode development. It provides
 abstractions of components which developers can extend in order to make their development process easier.
 
+## Architecture
+We have provided abstract definitions of the most general entities of a supply chain. An **Asset** represents
+the definition of an item, and **Record** is the actual item with its properties and quantity. An **Order** is
+an entity, representing the transfer of records between different organizations.
+
+![Example](examples/img/example.png)
+
 ## Structure
 
 * [chaincodes](cc)
@@ -22,4 +29,26 @@ abstractions of components which developers can extend in order to make their de
     * [record](types/record) - package, storing all record related structs 
 * [utils](utils) - helper functions for querying and creating objects
 
-## [Chaincode Examples](examples/README.md)
+## Examples
+
+## [1. Transparent Supply Chain](examples/transparent-supply-chain)
+
+### Goal
+The goal of this example is to prove blockchain can be used for tracking of goods
+without the need of external system integration or hidden private data.
+It involves only chaincode invocation in order to govern digitalization of
+assets, their records, orders, and their state transitions through the supply chain.
+
+### Structure
+   * [chaincode](examples/transparent-supply-chain/chaincode.go) - extends both [AssetBoundChaincode](cc/AssetBoundChaincode.go) and [ComposableChaincode](cc/ComposableChaincode.go),
+   having the functionality to create assets, records, orders, and functionality to make complex queries and sell records
+   * [chaincode_test](examples/transparent-supply-chain/chaincode_test.go) - tests for **chaincode**
+
+## [2. Transparent Supply Chain 2](examples/transparent-supply-chain-2)
+Each record has an additional list of quality certificates.
+
+### Structure
+   * [certifiedRecord](examples/transparent-supply-chain-2/certifiedRecord.go) - extends both [AssetBoundRecord](types/record/assetBoundRecord.go) and [ComposableRecord](types/record/composableRecord.go)
+   * [chaincode](examples/transparent-supply-chain-2/chaincode.go) - extends both [AssetBoundChaincode](cc/AssetBoundChaincode.go) and [ComposableChaincode](cc/ComposableChaincode.go),
+   having the functionality to create assets, records, orders, and functionality to make complex queries and sell records
+   * [chaincode_test](examples/transparent-supply-chain-2/chaincode_test.go) - tests for **chaincode**
