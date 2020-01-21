@@ -9,7 +9,11 @@ We have provided abstract definitions of the most general entities of a supply c
 the definition of an item, and **Record** is the actual item with its properties and quantity. An **Order** is
 an entity, representing the transfer of records between different organizations.
 
-![Example](examples/img/example.png)
+### Business Process Flow
+![Business Process Flow](examples/img/business-process-flow.png)
+
+### World State
+![World State](examples/img/world-state.png)
 
 ## Structure
 
