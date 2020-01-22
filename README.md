@@ -1,7 +1,7 @@
 # SupplyKit
 
 ## Overview
-SupplyKit is a library for supply chain based Hyperledger Fabric chaincode development. It provides
+**SupplyKit** is a library for supply chain based Hyperledger Fabric chaincode development. It provides
 abstractions of components which developers can extend in order to make their development process easier.
 
 ## Architecture
@@ -9,10 +9,20 @@ We have provided abstract definitions of the most general entities of a supply c
 the definition of an item, and **Record** is the actual item with its properties and quantity. An **Order** is
 an entity, representing the transfer of records between different organizations.
 
-### Business Process Flow
+We have decided to demonstrate a basic supply chain of bikes from their assembly to their distribution to customers.
+Functionality is divided between three organizations:
+  * Manufacturer - defines non-composable assets and manufactures their records
+  * Assembler - buys records from **Manufacturer** and assembles complex assets
+  * Distributor - buys records from **Assembler** and sells them to customers
+
+In the examples below, a bike is assembled from two assets - 1 saddle and 1 frame. The **Business Process Flow** diagram
+demonstrates the flow of customer ordering a bike from distributor. **World State** diagram shows the world state on
+every action until the bikes' distribution.
+
+### Business Process Flow Diagram
 ![Business Process Flow](examples/img/business-process-flow.png)
 
-### World State
+### World State Diagram
 ![World State](examples/img/world-state.png)
 
 ## Structure
