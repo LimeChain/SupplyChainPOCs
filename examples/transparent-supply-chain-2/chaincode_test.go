@@ -62,7 +62,7 @@ var _ = Describe("Tests for TransparentSupplyChainChaincode 2", func() {
 			})
 		})
 
-		Describe("addAssetType", func() {
+		Describe("addAsset", func() {
 			var assetDto dto.AssetDto
 			var payload asset.Asset
 
@@ -74,11 +74,11 @@ var _ = Describe("Tests for TransparentSupplyChainChaincode 2", func() {
 				jsonAsset, _ := json.Marshal(assetDto)
 
 				result = stub.MockInvoke("000", [][]byte{
-					[]byte(constants.AddAssetType),
+					[]byte(constants.AddAsset),
 					jsonAsset})
 			})
 
-			It("Should successfully execute addAssetType", func() {
+			It("Should successfully execute addAsset", func() {
 				Expect(result.Status).To(Equal(constants.Status200))
 
 				payload = asset.Asset{}
@@ -88,17 +88,17 @@ var _ = Describe("Tests for TransparentSupplyChainChaincode 2", func() {
 				Expect(payload.IsActive).To(Equal(assetDto.IsActive))
 			})
 
-			It("Should unsuccessfully execute addAssetType due to invalid arguments length", func() {
+			It("Should unsuccessfully execute addAsset due to invalid arguments length", func() {
 				result = stub.MockInvoke("000", [][]byte{
-					[]byte(constants.AddAssetType)})
+					[]byte(constants.AddAsset)})
 
 				Expect(result.Status).To(Equal(constants.Status500))
 				Expect(result.Message).To(Equal(constants.ErrorArgumentsLength))
 			})
 
-			It("Should unsuccessfully execute addAssetType due to invalid argument", func() {
+			It("Should unsuccessfully execute addAsset due to invalid argument", func() {
 				result = stub.MockInvoke("000", [][]byte{
-					[]byte(constants.AddAssetType),
+					[]byte(constants.AddAsset),
 					[]byte(constants.ExampleTest)})
 
 				Expect(result.Status).To(Equal(constants.Status500))

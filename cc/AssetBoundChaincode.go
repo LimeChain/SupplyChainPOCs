@@ -11,7 +11,7 @@ type AssetBoundChaincode struct {
 	BaseSupplyChainChaincode
 }
 
-func (abcc *AssetBoundChaincode) AddAssetType(id string, assetDto *dto.AssetDto) *asset.Asset {
+func (abcc *AssetBoundChaincode) AddAsset(id string, assetDto *dto.AssetDto) *asset.Asset {
 	return asset.NewAsset(id, assetDto)
 }
 
