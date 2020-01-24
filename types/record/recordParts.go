@@ -1,6 +1,6 @@
-package types
+package record
 
-type AssetAssembly struct {
+type RecordParts []struct {
 	Id       string `json:"id,omitempty"`
 	Quantity uint64 `json:"quantity,omitempty"`
 }
