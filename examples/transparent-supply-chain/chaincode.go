@@ -46,8 +46,8 @@ func (tsccc *TSCChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 	funcName, args := stub.GetFunctionAndParameters()
 
 	switch funcName {
-	case constants.AddAssetType:
-		return tsccc.addAssetType(stub, args)
+	case constants.AddAsset:
+		return tsccc.addAsset(stub, args)
 	case examplesConstants.Assemble:
 		return tsccc.assemble(stub, args)
 	case examplesConstants.Manufacture:
@@ -65,7 +65,7 @@ func (tsccc *TSCChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 	return shim.Error(fmt.Sprintf(constants.ErrorInvalidFunctionName, funcName))
 }
 
-func (tsccc *TSCChaincode) addAssetType(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+func (tsccc *TSCChaincode) addAsset(stub shim.ChaincodeStubInterface, args []string) peer.Response {
 	if len(args) != 1 {
 		return shim.Error(constants.ErrorArgumentsLength)
 	}
@@ -83,7 +83,7 @@ func (tsccc *TSCChaincode) addAssetType(stub shim.ChaincodeStubInterface, args [
 		return shim.Error(err.Error())
 	}
 
-	assetStruct := tsccc.AddAssetType(assetId, &assetDto)
+	assetStruct := tsccc.AddAsset(assetId, &assetDto)
 
 	jsonAsset, err := json.Marshal(assetStruct)
 
@@ -406,7 +406,7 @@ func (tsccc *TSCChaincode) sell(stub shim.ChaincodeStubInterface, args []string)
 	return shim.Success(jsonRecord)
 }
 
-func (tsccc *TSCChaincode) query(stub shim.ChaincodeStubInterface, args [] string) peer.Response {
+func (tsccc *TSCChaincode) query(stub shim.ChaincodeStubInterface, args []string) peer.Response {
 	queryResults, err := utils.GetQueryResultForQueryString(stub, args[0])
 
 	if err != nil {

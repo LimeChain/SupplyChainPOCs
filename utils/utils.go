@@ -69,7 +69,7 @@ func GetOrganization(stub shim.ChaincodeStubInterface, index uint) string {
 func CreateAsset(stub *shim.MockStub, assetDto *dto.AssetDto) asset.Asset {
 	jsonAsset, _ := json.Marshal(assetDto)
 	result := stub.MockInvoke("000", [][]byte{
-		[]byte(constants.AddAssetType),
+		[]byte(constants.AddAsset),
 		jsonAsset})
 
 	payload := asset.Asset{}

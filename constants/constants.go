@@ -33,7 +33,7 @@ const (
 
 // Chaincode Functions
 const (
-	AddAssetType = "addAssetType"
+	AddAsset     = "addAsset"
 	Compose      = "compose"
 	Create       = "create"
 	Init         = "init"

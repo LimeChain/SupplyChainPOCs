@@ -1,5 +1,6 @@
 package constants
+
 const (
-	Assemble = "assemble"
+	Assemble    = "assemble"
 	Manufacture = "manufacture"
 )
