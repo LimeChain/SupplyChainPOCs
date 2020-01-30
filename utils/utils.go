@@ -78,7 +78,7 @@ func CreateAsset(stub *shim.MockStub, assetDto *dto.AssetDto) asset.Asset {
 	return payload
 }
 
-func CreateAssetBoundOrder(stub *shim.MockStub, assetId string) order.Order {
+func CreateAssetBoundOrder(stub *shim.MockStub, assetId string) order.BaseOrder {
 	orderDto := dto.AssetBoundOrderDto{
 		AssetId: assetId,
 		OrderDto: &dto.OrderDto{
@@ -93,7 +93,7 @@ func CreateAssetBoundOrder(stub *shim.MockStub, assetId string) order.Order {
 		[]byte(constants.PlaceOrder),
 		jsonOrder})
 
-	payload := order.Order{}
+	payload := order.BaseOrder{}
 	json.Unmarshal(result.Payload, &payload)
 
 	return payload

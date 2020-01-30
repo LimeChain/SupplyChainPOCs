@@ -165,7 +165,8 @@ func (tsccc *TSCChaincode) placeOrder(stub shim.ChaincodeStubInterface, args []s
 		return shim.Error(err.Error())
 	}
 
-	orderStruct := tsccc.AssetBoundChaincode.PlaceOrder(orderId, &assetBoundOrderDto)
+	assetBoundOrder := tsccc.AssetBoundChaincode.PlaceOrder(orderId, &assetBoundOrderDto)
+	orderStruct := order.NewFullOrder(assetBoundOrder.BaseOrder, assetBoundOrderDto.PricePerUnit, assetBoundOrderDto.AssetId)
 
 	jsonOrder, err := json.Marshal(orderStruct)
 
@@ -211,7 +212,7 @@ func (tsccc *TSCChaincode) fulfillOrder(stub shim.ChaincodeStubInterface, args [
 		return shim.Error(fmt.Sprintf(constants.ErrorOrderIsFulfilled, orderFulfillmentDto.Id))
 	}
 
-	tsccc.AssetBoundChaincode.FulfillOrder(orderStruct.Order, orderFulfillmentDto.Status)
+	tsccc.AssetBoundChaincode.FulfillOrder(orderStruct.BaseOrder, orderFulfillmentDto.Status)
 
 	if !orderStruct.IsCompleted {
 		return shim.Error(fmt.Sprintf(constants.ErrorOrderIsNotFulfilled, orderStruct.Id))
