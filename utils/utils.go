@@ -3,6 +3,7 @@ package utils
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/LimeChain/SupplyChainPOCs/constants"
 	"github.com/LimeChain/SupplyChainPOCs/types/asset"
@@ -64,6 +65,20 @@ func GetOrganization(stub shim.ChaincodeStubInterface, index uint) string {
 	json.Unmarshal(organizationsBytes, &organizations)
 
 	return organizations[index]
+}
+
+func GetPrivateDataCollection(buyerMSP string, sellerMSP string) (string, error) {
+	if buyerMSP == constants.OrgTwo && sellerMSP == constants.OrgOne {
+		return constants.PDCOrg1Org2, nil
+	}
+	if buyerMSP == constants.OrgThree && sellerMSP == constants.OrgOne {
+		return constants.PDCOrg1Org3, nil
+	}
+	if buyerMSP == constants.OrgThree && sellerMSP == constants.OrgTwo {
+		return constants.PDCOrg2Org3, nil
+	}
+
+	return "", errors.New(fmt.Sprintf(constants.ErrorInvalidMSPs, buyerMSP, sellerMSP))
 }
 
 func CreateAsset(stub *shim.MockStub, assetDto *dto.AssetDto) asset.Asset {
