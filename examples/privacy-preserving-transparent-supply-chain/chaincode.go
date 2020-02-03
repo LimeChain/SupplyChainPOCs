@@ -10,7 +10,7 @@ import (
 	"github.com/LimeChain/SupplyChainPOCs/types/order"
 	"github.com/LimeChain/SupplyChainPOCs/types/record"
 	"github.com/LimeChain/SupplyChainPOCs/utils"
-	"github.com/hyperledger/fabric/core/chaincode/lib/cid"
+	"github.com/hyperledger/fabric-chaincode-go/pkg/cid"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	"github.com/hyperledger/fabric/protos/peer"
 	"time"

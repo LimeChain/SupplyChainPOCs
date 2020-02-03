@@ -6,7 +6,7 @@ const (
 	ErrorAssetIdNotFound        = "Asset with Id: %s not found"
 	ErrorInvalidFunctionName    = "Invalid invoke function name: %s"
 	ErrorInvalidMSP             = "Invalid MSP Id: %s"
-	ErrorInvalidMSPs			= "Invalid MSPs: '%s', '%s'"
+	ErrorInvalidMSPs            = "Invalid MSPs: '%s', '%s'"
 	ErrorOrderIdNotFound        = "Order with Id: %s not found"
 	ErrorOrderIsFulfilled       = "Order with Id: %s is already fulfilled"
 	ErrorOrderIsNotFulfilled    = "Order with Id: %s has not been fulfilled"
