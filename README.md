@@ -66,3 +66,38 @@ Each record has an additional list of quality certificates.
    * [chaincode](examples/transparent-supply-chain-2/chaincode.go) - extends both [AssetBoundChaincode](cc/AssetBoundChaincode.go) and [ComposableChaincode](cc/ComposableChaincode.go),
    having the functionality to create assets, records, orders, and functionality to make complex queries and sell records
    * [chaincode_test](examples/transparent-supply-chain-2/chaincode_test.go) - tests for **chaincode**
+
+## [3. Privacy Preserving Transparent Supply Chain](examples/privacy-preserving-transparent-supply-chain)
+
+### Goal
+The goal of this example is to prove the privacy of sensitive organisational data in real-world scenarios, like, for example, trade secret.
+Hyperledger Fabric offers private data functionality, allowing parties of one and the same channel to keep data private between each other without disclosing it
+to the rest of the channel.
+
+Instead of storing the order's price in the World State, price will now be stored in a **private data collection** depending on the issuer and distributor of the given order.
+
+We have added restrictions on the allowance of chaincode invocation functions in order to visualize the flow as authentic as possible.
+
+### Structure
+   * [chaincode](examples/privacy-preserving-transparent-supply-chain/chaincode.go) - extends both [AssetBoundChaincode](cc/AssetBoundChaincode.go) and [ComposableChaincode](cc/ComposableChaincode.go),
+   having the functionality to create assets, records, orders, and functionality to make complex queries and sell records. Chaincode invocation functions are restricted
+   to specific organisations. Chaincode stores the orders' price in private data collections.
+   * [collections_config](examples/privacy-preserving-transparent-supply-chain/collections_config.json) - list of private data collection definitions.
+   * [scripts](examples/privacy-preserving-transparent-supply-chain/scripts) - scripts for **first-network** from [fabric-samples](https://github.com/hyperledger/fabric-samples) to demonstrate
+   the process flow.
+        * **run_script.sh** - using **cli** from **first-network** - installs chaincode on Org1 & Org2, instantiates chaincode on channel **mychannel**, invokes and queries private data with both organisations.
+        * **org3_cli.sh** - using **Org3cli** - installs chaincode and tries to query data from the private data collection of Org1 and Org2
+
+### How to run scripts?
+   * Run `byfn.sh -c mychannel -s couchdb` from [first-network](https://github.com/hyperledger/fabric-samples/tree/release-1.4/first-network)
+   * Run `eyfn.sh -c mychannel -s couchdb` from [first-network](https://github.com/hyperledger/fabric-samples/tree/release-1.4/first-network)
+   * Run `docker exec -it cli bash`
+       * Clone this repository: `git clone https://github.com/LimeChain/SupplyChainPOCs.git`
+       * Give execution permission to **run_script.sh** (`chmod u+x <path>/run_script.sh`)
+       * Install `go` dependencies if not already
+       * Run `run_script.sh`
+   * Open another terminal
+   * After `run_script.sh` has finished successfully, execute `docker exec -it Org3cli bash`
+       * Clone again this repository: `git clone https://github.com/LimeChain/SupplyChainPOCs.git`
+       * Give execution permission to **org3_cli.sh** (`chmod u+x <path>/org3_cli.sh`)
+       * Run `org3_cli.sh`

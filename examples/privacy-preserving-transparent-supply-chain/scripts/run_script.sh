@@ -37,7 +37,7 @@ sleep 10
 
 INIT_ARGS="{\"Args\":[\"init\", \"Org1MSP\", \"Org2MSP\", \"Org3MSP\"]}"
 echo "Instantiating chaincode on Org1MSP ..."
-peer chaincode instantiate -n $CC_NAME -v $CC_VERSION -c "${INIT_ARGS}" --collections-config /opt/gopath/src/github.com/LimeChain/SupplyChainPOCs/examples/privacy-preserving-transparent-supply-chain/collections_config.json --tls --cafile $ORDERER_CA -C mychannel
+peer chaincode instantiate -n $CC_NAME -v $CC_VERSION -C $CC_CHANNEL_NAME -c "${INIT_ARGS}" --collections-config /opt/gopath/src/github.com/LimeChain/SupplyChainPOCs/examples/privacy-preserving-transparent-supply-chain/collections_config.json --tls --cafile $ORDERER_CA
 
 echo "Waiting for instantiation request to be committed ..."
 sleep 10
