@@ -1,4 +1,4 @@
-package transparent_supply_chain_2
+package privacy_preserving_transparent_supply_chain
 
 import (
 	"encoding/json"
@@ -10,17 +10,18 @@ import (
 	"github.com/LimeChain/SupplyChainPOCs/types/order"
 	"github.com/LimeChain/SupplyChainPOCs/types/record"
 	"github.com/LimeChain/SupplyChainPOCs/utils"
+	"github.com/hyperledger/fabric-chaincode-go/pkg/cid"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	"github.com/hyperledger/fabric/protos/peer"
 	"time"
 )
 
-type TSCChaincode_2 struct {
+type PPTSCChaincode struct {
 	cc.AssetBoundChaincode
 	cc.ComposableChaincode
 }
 
-func (tsccc *TSCChaincode_2) Init(stub shim.ChaincodeStubInterface) peer.Response {
+func (pptsccc *PPTSCChaincode) Init(stub shim.ChaincodeStubInterface) peer.Response {
 	_, args := stub.GetFunctionAndParameters()
 
 	if len(args) != 3 {
@@ -42,36 +43,48 @@ func (tsccc *TSCChaincode_2) Init(stub shim.ChaincodeStubInterface) peer.Respons
 	return shim.Success(organizations)
 }
 
-func (tsccc *TSCChaincode_2) Invoke(stub shim.ChaincodeStubInterface) peer.Response {
+func (pptsccc *PPTSCChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Response {
 	funcName, args := stub.GetFunctionAndParameters()
 
 	switch funcName {
 	case constants.AddAsset:
-		return tsccc.addAsset(stub, args)
+		return pptsccc.addAsset(stub, args)
 	case examplesConstants.Assemble:
-		return tsccc.assemble(stub, args)
+		return pptsccc.assemble(stub, args)
 	case examplesConstants.Manufacture:
-		return tsccc.manufacture(stub, args)
+		return pptsccc.manufacture(stub, args)
 	case constants.PlaceOrder:
-		return tsccc.placeOrder(stub, args)
+		return pptsccc.placeOrder(stub, args)
 	case constants.FulfillOrder:
-		return tsccc.fulfillOrder(stub, args)
+		return pptsccc.fulfillOrder(stub, args)
 	case constants.Sell:
-		return tsccc.sell(stub, args)
+		return pptsccc.sell(stub, args)
 	case constants.Query:
-		return tsccc.query(stub, args)
+		return pptsccc.query(stub, args)
+	case constants.QueryPrivate:
+		return pptsccc.queryPrivate(stub, args)
 	}
 
 	return shim.Error(fmt.Sprintf(constants.ErrorInvalidFunctionName, funcName))
 }
 
-func (tsccc *TSCChaincode_2) addAsset(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+func (pptsccc *PPTSCChaincode) addAsset(stub shim.ChaincodeStubInterface, args []string) peer.Response {
 	if len(args) != 1 {
 		return shim.Error(constants.ErrorArgumentsLength)
 	}
 
+	mspId, err := cid.GetMSPID(stub)
+
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
+	if mspId != utils.GetOrganization(stub, constants.Org1Index) {
+		return shim.Error(fmt.Sprintf(constants.ErrorInvalidMSP, mspId))
+	}
+
 	assetDto := dto.AssetDto{}
-	err := json.Unmarshal([]byte(args[0]), &assetDto)
+	err = json.Unmarshal([]byte(args[0]), &assetDto)
 
 	if err != nil {
 		return shim.Error(err.Error())
@@ -83,7 +96,7 @@ func (tsccc *TSCChaincode_2) addAsset(stub shim.ChaincodeStubInterface, args []s
 		return shim.Error(err.Error())
 	}
 
-	assetStruct := tsccc.AddAsset(assetId, &assetDto)
+	assetStruct := pptsccc.AddAsset(assetId, &assetDto)
 
 	jsonAsset, err := json.Marshal(assetStruct)
 
@@ -100,13 +113,23 @@ func (tsccc *TSCChaincode_2) addAsset(stub shim.ChaincodeStubInterface, args []s
 	return shim.Success(jsonAsset)
 }
 
-func (tsccc *TSCChaincode_2) manufacture(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+func (pptsccc *PPTSCChaincode) manufacture(stub shim.ChaincodeStubInterface, args []string) peer.Response {
 	if len(args) != 1 {
 		return shim.Error(constants.ErrorArgumentsLength)
 	}
 
-	recordDto := CertifiedRecordDto{}
-	err := json.Unmarshal([]byte(args[0]), &recordDto)
+	mspId, err := cid.GetMSPID(stub)
+
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
+	if mspId != utils.GetOrganization(stub, constants.Org1Index) {
+		return shim.Error(fmt.Sprintf(constants.ErrorInvalidMSP, mspId))
+	}
+
+	recordDto := dto.AssetBoundRecordDto{}
+	err = json.Unmarshal([]byte(args[0]), &recordDto)
 
 	if err != nil {
 		return shim.Error(err.Error())
@@ -124,9 +147,8 @@ func (tsccc *TSCChaincode_2) manufacture(stub shim.ChaincodeStubInterface, args 
 		return shim.Error(err.Error())
 	}
 
-	baseRecord := tsccc.ComposableChaincode.BaseSupplyChainChaincode.Create(recordId, recordDto.BaseRecordDto)
-
-	recordStruct := NewCertifiedRecord(baseRecord, recordDto.AssetId, record.RecordParts(recordDto.ComposedFrom), recordDto.QualityCertificates)
+	recordDto.Owner = mspId
+	recordStruct := pptsccc.AssetBoundChaincode.Create(recordId, &recordDto)
 
 	jsonRecord, err := json.Marshal(recordStruct)
 
@@ -134,7 +156,7 @@ func (tsccc *TSCChaincode_2) manufacture(stub shim.ChaincodeStubInterface, args 
 		return shim.Error(err.Error())
 	}
 
-	err = stub.PutState(recordId, jsonRecord)
+	err = stub.PutState(recordStruct.Id, jsonRecord)
 
 	if err != nil {
 		return shim.Error(err.Error())
@@ -143,7 +165,7 @@ func (tsccc *TSCChaincode_2) manufacture(stub shim.ChaincodeStubInterface, args 
 	return shim.Success(jsonRecord)
 }
 
-func (tsccc *TSCChaincode_2) placeOrder(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+func (pptsccc *PPTSCChaincode) placeOrder(stub shim.ChaincodeStubInterface, args []string) peer.Response {
 	if len(args) != 1 {
 		return shim.Error(constants.ErrorArgumentsLength)
 	}
@@ -153,6 +175,16 @@ func (tsccc *TSCChaincode_2) placeOrder(stub shim.ChaincodeStubInterface, args [
 
 	if err != nil {
 		return shim.Error(err.Error())
+	}
+
+	mspId, err := cid.GetMSPID(stub)
+
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
+	if mspId == utils.GetOrganization(stub, constants.Org1Index) {
+		return shim.Error(fmt.Sprintf(constants.ErrorInvalidMSP, mspId))
 	}
 
 	assetBytes, _ := stub.GetState(assetBoundOrderDto.AssetId)
@@ -167,14 +199,27 @@ func (tsccc *TSCChaincode_2) placeOrder(stub shim.ChaincodeStubInterface, args [
 		return shim.Error(err.Error())
 	}
 
-	assetBoundOrder := tsccc.AssetBoundChaincode.PlaceOrder(orderId, &assetBoundOrderDto)
-	orderStruct := order.NewFullOrder(assetBoundOrder.BaseOrder, assetBoundOrderDto.PricePerUnit, assetBoundOrderDto.AssetId)
+	orderStruct := pptsccc.AssetBoundChaincode.PlaceOrder(orderId, &assetBoundOrderDto)
+	orderStruct.BuyerId = mspId
+
+	privateDataCollection, err := utils.GetPrivateDataCollection(orderStruct.BuyerId, orderStruct.SellerId)
+
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
+	err = stub.PutPrivateData(privateDataCollection, orderStruct.Id, []byte(assetBoundOrderDto.PricePerUnit.String()))
+
+	if err != nil {
+		return shim.Error(err.Error())
+	}
 
 	jsonOrder, err := json.Marshal(orderStruct)
 
 	if err != nil {
 		return shim.Error(err.Error())
 	}
+
 	err = stub.PutState(orderStruct.Id, jsonOrder)
 
 	if err != nil {
@@ -184,13 +229,19 @@ func (tsccc *TSCChaincode_2) placeOrder(stub shim.ChaincodeStubInterface, args [
 	return shim.Success(jsonOrder)
 }
 
-func (tsccc *TSCChaincode_2) fulfillOrder(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+func (pptsccc *PPTSCChaincode) fulfillOrder(stub shim.ChaincodeStubInterface, args []string) peer.Response {
 	if len(args) != 1 {
 		return shim.Error(constants.ErrorArgumentsLength)
 	}
 
+	mspId, err := cid.GetMSPID(stub)
+
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
 	orderFulfillmentDto := dto.OrderFulfillmentDto{}
-	err := json.Unmarshal([]byte(args[0]), &orderFulfillmentDto)
+	err = json.Unmarshal([]byte(args[0]), &orderFulfillmentDto)
 
 	if err != nil {
 		return shim.Error(err.Error())
@@ -213,7 +264,11 @@ func (tsccc *TSCChaincode_2) fulfillOrder(stub shim.ChaincodeStubInterface, args
 		return shim.Error(fmt.Sprintf(constants.ErrorOrderIsFulfilled, orderFulfillmentDto.Id))
 	}
 
-	tsccc.AssetBoundChaincode.FulfillOrder(orderStruct.BaseOrder, orderFulfillmentDto.Status)
+	if mspId != orderStruct.SellerId {
+		return shim.Error(fmt.Sprintf(constants.ErrorInvalidMSP, mspId))
+	}
+
+	pptsccc.AssetBoundChaincode.FulfillOrder(orderStruct.BaseOrder, orderFulfillmentDto.Status)
 
 	if !orderStruct.IsCompleted {
 		return shim.Error(fmt.Sprintf(constants.ErrorOrderIsNotFulfilled, orderStruct.Id))
@@ -225,7 +280,7 @@ func (tsccc *TSCChaincode_2) fulfillOrder(stub shim.ChaincodeStubInterface, args
 		if len(recordBytes) == 0 {
 			return shim.Error(fmt.Sprintf(constants.ErrorRecordIdNotFound, recordElem.Id))
 		}
-		recordStruct := CertifiedRecord{}
+		recordStruct := record.AssetBoundRecord{}
 		err := json.Unmarshal(recordBytes, &recordStruct)
 
 		if err != nil {
@@ -233,42 +288,33 @@ func (tsccc *TSCChaincode_2) fulfillOrder(stub shim.ChaincodeStubInterface, args
 		}
 
 		if recordStruct.AssetId != orderStruct.AssetId {
-			return shim.Error(fmt.Sprintf(constants.ErrorRecordDifferentAssetId, recordStruct.AssetBoundRecord.Id, recordStruct.AssetId, orderStruct.AssetId))
+			return shim.Error(fmt.Sprintf(constants.ErrorRecordDifferentAssetId, recordStruct.Id, recordStruct.AssetId, orderStruct.AssetId))
 		}
 
-		if recordElem.Quantity > recordStruct.AssetBoundRecord.Quantity {
+		if recordElem.Quantity > recordStruct.Quantity {
 			return shim.Error(fmt.Sprintf(constants.ErrorRecordQuantity, recordElem.Id))
 		}
 
-		recordStruct.AssetBoundRecord.DecreaseQuantity(recordElem.Quantity)
+		recordStruct.DecreaseQuantity(recordElem.Quantity)
+
+		newRecordStruct := record.AssetBoundRecord{
+			BaseRecord: &record.BaseRecord{
+				BatchId:         recordStruct.BatchId,
+				CreationOrderId: orderStruct.Id,
+				Owner:           orderStruct.BuyerId,
+				Quantity:        recordElem.Quantity,
+				DateCreated:     time.Now(),
+			},
+			AssetId: recordStruct.AssetId,
+		}
 
 		newRecordId, err := utils.CreateCompositeKey(stub, constants.PrefixRecord)
-
-		recordBase := record.BaseRecord{
-			Id:              newRecordId,
-			BatchId:         recordStruct.AssetBoundRecord.BatchId,
-			CreationOrderId: orderStruct.Id,
-			Owner:           orderStruct.BuyerId,
-			Quantity:        recordElem.Quantity,
-			DateCreated:     time.Now(),
-		}
-
-		newRecordStruct := CertifiedRecord{
-			BaseRecord: &recordBase,
-			ComposableRecord: &record.ComposableRecord{
-				ComposedFrom: recordStruct.ComposedFrom,
-			},
-			AssetBoundRecord: &record.AssetBoundRecord{
-				AssetId: recordStruct.AssetId,
-			},
-			QualityCertificates: recordStruct.QualityCertificates,
-		}
 
 		if err != nil {
 			return shim.Error(err.Error())
 		}
 
-		newRecordStruct.AssetBoundRecord.Id = newRecordId
+		newRecordStruct.Id = newRecordId
 
 		jsonRecord, err := json.Marshal(recordStruct)
 
@@ -276,7 +322,7 @@ func (tsccc *TSCChaincode_2) fulfillOrder(stub shim.ChaincodeStubInterface, args
 			return shim.Error(err.Error())
 		}
 
-		err = stub.PutState(recordStruct.AssetBoundRecord.Id, jsonRecord)
+		err = stub.PutState(recordStruct.Id, jsonRecord)
 
 		if err != nil {
 			return shim.Error(err.Error())
@@ -288,7 +334,7 @@ func (tsccc *TSCChaincode_2) fulfillOrder(stub shim.ChaincodeStubInterface, args
 			return shim.Error(err.Error())
 		}
 
-		err = stub.PutState(newRecordStruct.AssetBoundRecord.Id, jsonRecord)
+		err = stub.PutState(newRecordStruct.Id, jsonRecord)
 
 		if err != nil {
 			return shim.Error(err.Error())
@@ -309,32 +355,40 @@ func (tsccc *TSCChaincode_2) fulfillOrder(stub shim.ChaincodeStubInterface, args
 	return shim.Success(jsonOrder)
 }
 
-func (tsccc *TSCChaincode_2) assemble(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+func (pptsccc *PPTSCChaincode) assemble(stub shim.ChaincodeStubInterface, args []string) peer.Response {
 	if len(args) != 1 {
 		return shim.Error(constants.ErrorArgumentsLength)
 	}
 
-	composeRequest := CertifiedCombineRequestDto{}
-	err := json.Unmarshal([]byte(args[0]), &composeRequest)
+	mspId, err := cid.GetMSPID(stub)
 
 	if err != nil {
 		return shim.Error(err.Error())
 	}
 
-	assetBytes, _ := stub.GetState(composeRequest.AssetId)
+	if mspId != utils.GetOrganization(stub, constants.Org2Index) {
+		return shim.Error(fmt.Sprintf(constants.ErrorInvalidMSP, mspId))
+	}
+
+	assetComposeRequest := dto.AssetComposeRequestDto{}
+	err = json.Unmarshal([]byte(args[0]), &assetComposeRequest)
+
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
+	assetBytes, _ := stub.GetState(assetComposeRequest.AssetId)
 
 	if len(assetBytes) == 0 {
-		return shim.Error(fmt.Sprintf(constants.ErrorAssetIdNotFound, composeRequest.AssetId))
+		return shim.Error(fmt.Sprintf(constants.ErrorAssetIdNotFound, assetComposeRequest.AssetId))
 	}
 
 	newRecordId, err := utils.CreateCompositeKey(stub, constants.PrefixRecord)
-	composedRecord, updatedRecords, err := tsccc.ComposableChaincode.Compose(stub, newRecordId, composeRequest.ComposeRequestDto)
+	newRecord, updatedRecords, err := pptsccc.ComposableChaincode.Compose(stub, newRecordId, assetComposeRequest.ComposeRequestDto)
 
 	if err != nil {
 		return shim.Error(err.Error())
 	}
-
-	newRecord := NewCertifiedRecord(composedRecord.BaseRecord, composeRequest.AssetId, composedRecord.ComposedFrom, composeRequest.QualityCertificates)
 
 	for _, updatedRecord := range updatedRecords {
 		recordBytes, _ := stub.GetState(updatedRecord.Id)
@@ -373,13 +427,23 @@ func (tsccc *TSCChaincode_2) assemble(stub shim.ChaincodeStubInterface, args []s
 	return shim.Success(jsonNewRecord)
 }
 
-func (tsccc *TSCChaincode_2) sell(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+func (pptsccc *PPTSCChaincode) sell(stub shim.ChaincodeStubInterface, args []string) peer.Response {
 	if len(args) != 1 {
 		return shim.Error(constants.ErrorArgumentsLength)
 	}
 
+	mspId, err := cid.GetMSPID(stub)
+
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
+	if mspId != utils.GetOrganization(stub, constants.Org3Index) {
+		return shim.Error(fmt.Sprintf(constants.ErrorInvalidMSP, mspId))
+	}
+
 	sellRequest := dto.SellDto{}
-	err := json.Unmarshal([]byte(args[0]), &sellRequest)
+	err = json.Unmarshal([]byte(args[0]), &sellRequest)
 
 	if err != nil {
 		return shim.Error(err.Error())
@@ -419,7 +483,7 @@ func (tsccc *TSCChaincode_2) sell(stub shim.ChaincodeStubInterface, args []strin
 	return shim.Success(jsonRecord)
 }
 
-func (tsccc *TSCChaincode_2) query(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+func (pptsccc *PPTSCChaincode) query(stub shim.ChaincodeStubInterface, args []string) peer.Response {
 	queryResults, err := utils.GetQueryResultForQueryString(stub, args[0])
 
 	if err != nil {
@@ -427,4 +491,25 @@ func (tsccc *TSCChaincode_2) query(stub shim.ChaincodeStubInterface, args []stri
 	}
 
 	return shim.Success(queryResults)
+}
+
+func (pptsccc *PPTSCChaincode) queryPrivate(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+	if len(args) != 1 {
+		return shim.Error(constants.ErrorArgumentsLength)
+	}
+
+	queryDto := dto.QueryPrivateDto{}
+	err := json.Unmarshal([]byte(args[0]), &queryDto)
+
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
+	result, err := stub.GetPrivateData(queryDto.Collection, queryDto.Key)
+
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
+	return shim.Success(result)
 }

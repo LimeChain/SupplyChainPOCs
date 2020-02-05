@@ -180,7 +180,7 @@ var _ = Describe("Tests for TransparentSupplyChainChaincode", func() {
 		})
 
 		Describe("placeOrder functionality", func() {
-			var payload order.AssetBoundOrder
+			var payload order.FullOrder
 			var assetBoundOrderDto dto.AssetBoundOrderDto
 			var assetPayload asset.Asset
 
@@ -210,7 +210,7 @@ var _ = Describe("Tests for TransparentSupplyChainChaincode", func() {
 
 				Expect(result.Status).To(Equal(constants.Status200))
 
-				payload = order.AssetBoundOrder{}
+				payload = order.FullOrder{}
 				json.Unmarshal(result.Payload, &payload)
 
 				Expect(payload.AssetId).To(Equal(assetBoundOrderDto.AssetId))
@@ -259,7 +259,7 @@ var _ = Describe("Tests for TransparentSupplyChainChaincode", func() {
 		})
 
 		Describe("fulfillOrder functionality", func() {
-			var orderStruct order.Order
+			var orderStruct order.BaseOrder
 			var orderFulfillment dto.OrderFulfillmentDto
 			var assetPayload asset.Asset
 			var jsonOrderFulfillment []byte

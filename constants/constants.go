@@ -5,6 +5,8 @@ const (
 	ErrorArgumentsLength        = "Invalid arguments length"
 	ErrorAssetIdNotFound        = "Asset with Id: %s not found"
 	ErrorInvalidFunctionName    = "Invalid invoke function name: %s"
+	ErrorInvalidMSP             = "Invalid MSP Id: %s"
+	ErrorInvalidMSPs            = "Invalid MSPs: '%s', '%s'"
 	ErrorOrderIdNotFound        = "Order with Id: %s not found"
 	ErrorOrderIsFulfilled       = "Order with Id: %s is already fulfilled"
 	ErrorOrderIsNotFulfilled    = "Order with Id: %s has not been fulfilled"
@@ -40,6 +42,7 @@ const (
 	FulfillOrder = "fulfillOrder"
 	PlaceOrder   = "placeOrder"
 	Query        = "query"
+	QueryPrivate = "queryPrivate"
 	Sell         = "sell"
 )
 
@@ -48,6 +51,13 @@ const (
 	PrefixRecord = "record"
 	PrefixOrder  = "order"
 	PrefixAsset  = "asset"
+)
+
+// Private Data Collections
+const (
+	PDCOrg1Org2 = "Org1Org2PricePerUnit"
+	PDCOrg1Org3 = "Org1Org3PricePerUnit"
+	PDCOrg2Org3 = "Org2Org3PricePerUnit"
 )
 
 // Test data

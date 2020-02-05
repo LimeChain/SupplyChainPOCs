@@ -13,10 +13,10 @@ func (bsccc *BaseSupplyChainChaincode) Create(id string, dto *dto.BaseRecordDto)
 	return record.NewRecord(id, dto)
 }
 
-func (bsccc *BaseSupplyChainChaincode) PlaceOrder(id string, orderDto *dto.OrderDto) *order.Order {
+func (bsccc *BaseSupplyChainChaincode) PlaceOrder(id string, orderDto *dto.OrderDto) *order.BaseOrder {
 	return order.NewOrder(id, orderDto)
 }
 
-func (bsccc *BaseSupplyChainChaincode) FulfillOrder(orderStruct *order.Order, status bool) *order.Order {
+func (bsccc *BaseSupplyChainChaincode) FulfillOrder(orderStruct *order.BaseOrder, status bool) *order.BaseOrder {
 	return orderStruct.FulfillOrder(status)
 }

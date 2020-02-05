@@ -1,13 +1,13 @@
 package order
 
 type AssetBoundOrder struct {
-	*Order
+	*BaseOrder
 	AssetId string `json:"assetId,omitempty"`
 }
 
-func NewAssetBoundOrder(order *Order, assetId string) *AssetBoundOrder {
+func NewAssetBoundOrder(order *BaseOrder, assetId string) *AssetBoundOrder {
 	return &AssetBoundOrder{
-		Order:   order,
-		AssetId: assetId,
+		BaseOrder: order,
+		AssetId:   assetId,
 	}
 }
