@@ -92,12 +92,11 @@ We have added restrictions on the allowance of chaincode invocation functions in
    * Run `byfn.sh -c mychannel -s couchdb` from [first-network](https://github.com/hyperledger/fabric-samples/tree/release-1.4/first-network)
    * Run `eyfn.sh -c mychannel -s couchdb` from [first-network](https://github.com/hyperledger/fabric-samples/tree/release-1.4/first-network)
    * Run `docker exec -it cli bash`
-       * Clone this repository: `git clone https://github.com/LimeChain/SupplyChainPOCs.git`
+       * Get the package: `go get github.com/LimeChain/SupplyChainPOCs/...`
        * Give execution permission to **run_script.sh** (`chmod u+x <path>/run_script.sh`)
-       * Install `go` dependencies if not already
        * Run `run_script.sh`
    * Open another terminal
    * After `run_script.sh` has finished successfully, execute `docker exec -it Org3cli bash`
-       * Clone again this repository: `git clone https://github.com/LimeChain/SupplyChainPOCs.git`
+       * Get the package again: `go get github.com/LimeChain/SupplyChainPOCs`
        * Give execution permission to **org3_cli.sh** (`chmod u+x <path>/org3_cli.sh`)
        * Run `org3_cli.sh`
